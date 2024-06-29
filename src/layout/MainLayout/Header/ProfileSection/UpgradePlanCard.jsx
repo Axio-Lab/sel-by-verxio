@@ -51,19 +51,17 @@ const UpgradePlanCard = () => {
           </Grid>
           <Grid item>
             <Typography variant="subtitle2" color={'grey.900'} sx={{ opacity: 0.6 }}>
-              70% discount for 1 years <br />
+              20% discount for 1 year <br />
               subscriptions.
             </Typography>
           </Grid>
           <Grid item>
             <Stack direction="row">
-              <Link sx={{ textDecoration: 'none' }} href="https://links.codedthemes.com/hsqll" target="_blank">
                 <AnimateButton>
                   <Button variant="contained" color="warning" sx={{ boxShadow: 'none' }}>
                     Go Premium
                   </Button>
                 </AnimateButton>
-              </Link>
             </Stack>
           </Grid>
         </Grid>

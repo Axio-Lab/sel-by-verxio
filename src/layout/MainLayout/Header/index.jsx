@@ -12,13 +12,23 @@ import SearchSection from './SearchSection';
 import NotificationSection from './NotificationSection';
 import ProfileSection from './ProfileSection';
 
+import {
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
+
+import {
+  useWallet,
+} from '@solana/wallet-adapter-react';
+
 // assets
 import { IconMenu2 } from '@tabler/icons-react';
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
 const Header = ({ handleLeftDrawerToggle }) => {
+  
   const theme = useTheme();
+  const { connected } = useWallet();
 
   return (
     <>
@@ -63,8 +73,9 @@ const Header = ({ handleLeftDrawerToggle }) => {
       <Box sx={{ flexGrow: 1 }} />
 
       {/* notification & profile */}
-      <NotificationSection />
-      <ProfileSection />
+      {connected && <NotificationSection />}
+      {!connected && <WalletMultiButton style={{fontFamily: 'Space Grotesk'}}>Get Started</WalletMultiButton>}
+      {connected && <ProfileSection />}
     </>
   );
 };
