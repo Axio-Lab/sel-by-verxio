@@ -8,6 +8,13 @@ import { Provider } from 'react-redux';
 import App from './App';
 import reducer from './store/reducer';
 
+// fontsource
+
+import "@fontsource/space-grotesk/400.css"; 
+import "@fontsource/space-grotesk/500.css"; 
+import "@fontsource/space-grotesk/600.css"; 
+import "@fontsource/space-grotesk/700.css"; 
+
 // google-fonts
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';

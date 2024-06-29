@@ -23,6 +23,7 @@ import Chip from 'ui-component/extended/Chip';
 // assets
 import { IconBrandTelegram, IconBuildingStore, IconMailbox, IconPhoto } from '@tabler/icons-react';
 import User1 from 'assets/images/users/user-round.svg';
+import User from 'assets/images/users/donatus.jpg';
 
 const ListItemWrapper = ({ children }) => {
   return (
@@ -99,9 +100,9 @@ const NotificationList = () => {
       <ListItemWrapper>
         <ListItem alignItems="center">
           <ListItemAvatar>
-            <Avatar alt="John Doe" src={User1} />
+            <Avatar alt="John Doe" src={User} />
           </ListItemAvatar>
-          <ListItemText primary="John Doe" />
+          <ListItemText primary="Donatus Prince" />
           <ListItemSecondaryAction>
             <Grid container justifyContent="flex-end">
               <Grid item xs={12}>
@@ -114,7 +115,7 @@ const NotificationList = () => {
         </ListItem>
         <Grid container direction="column" className="list-container">
           <Grid item xs={12} sx={{ pb: 2 }}>
-            <Typography variant="subtitle2">It is a long established fact that a reader will be distracted</Typography>
+            <Typography variant="subtitle2">SEL is creating an on-chain experience for everyone on Solana with Blinks</Typography>
           </Grid>
           <Grid item xs={12}>
             <Grid container>
@@ -143,12 +144,12 @@ const NotificationList = () => {
               <IconBuildingStore stroke={1.5} size="1.3rem" />
             </Avatar>
           </ListItemAvatar>
-          <ListItemText primary={<Typography variant="subtitle1">Store Verification Done</Typography>} />
+          <ListItemText primary={<Typography variant="subtitle1">Blinks Verification</Typography>} />
           <ListItemSecondaryAction>
             <Grid container justifyContent="flex-end">
               <Grid item xs={12}>
                 <Typography variant="caption" display="block" gutterBottom>
-                  2 min ago
+                  12 min ago
                 </Typography>
               </Grid>
             </Grid>
@@ -187,7 +188,7 @@ const NotificationList = () => {
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Typography variant="caption" display="block" gutterBottom>
-                  2 min ago
+                  25 min ago
                 </Typography>
               </Grid>
             </Grid>
@@ -214,12 +215,12 @@ const NotificationList = () => {
           <ListItemAvatar>
             <Avatar alt="John Doe" src={User1} />
           </ListItemAvatar>
-          <ListItemText primary={<Typography variant="subtitle1">John Doe</Typography>} />
+          <ListItemText primary={<Typography variant="subtitle1">The SEL Team</Typography>} />
           <ListItemSecondaryAction>
             <Grid container justifyContent="flex-end">
               <Grid item xs={12}>
                 <Typography variant="caption" display="block" gutterBottom>
-                  2 min ago
+                  43 min ago
                 </Typography>
               </Grid>
             </Grid>
@@ -228,9 +229,9 @@ const NotificationList = () => {
         <Grid container direction="column" className="list-container">
           <Grid item xs={12} sx={{ pb: 2 }}>
             <Typography component="span" variant="subtitle2">
-              Uploaded two file on &nbsp;
+              Created two product on &nbsp;
               <Typography component="span" variant="h6">
-                21 Jan 2020
+                21 June 2024
               </Typography>
             </Typography>
           </Grid>
@@ -264,12 +265,12 @@ const NotificationList = () => {
           <ListItemAvatar>
             <Avatar alt="John Doe" src={User1} />
           </ListItemAvatar>
-          <ListItemText primary={<Typography variant="subtitle1">John Doe</Typography>} />
+          <ListItemText primary={<Typography variant="subtitle1">Dialect Team</Typography>} />
           <ListItemSecondaryAction>
             <Grid container justifyContent="flex-end">
               <Grid item xs={12}>
                 <Typography variant="caption" display="block" gutterBottom>
-                  2 min ago
+                  57 min ago
                 </Typography>
               </Grid>
             </Grid>
@@ -277,7 +278,7 @@ const NotificationList = () => {
         </ListItem>
         <Grid container direction="column" className="list-container">
           <Grid item xs={12} sx={{ pb: 2 }}>
-            <Typography variant="subtitle2">It is a long established fact that a reader will be distracted</Typography>
+            <Typography variant="subtitle2">Your solana action has been added to the dialect registery</Typography>
           </Grid>
           <Grid item xs={12}>
             <Grid container>
