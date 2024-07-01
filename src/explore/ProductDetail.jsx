@@ -14,20 +14,25 @@ import {
 } from '@mui/material';
 import { PhotoCamera, UploadFile } from '@mui/icons-material';
 
-const productTypes = ['Ticket', 'Course', 'Service', 'Love Gift'];
-const categories = ['Category 1', 'Category 2', 'Category 3', 'Category 4'];
+const productTypes = ['📚 Ebook', '🎫 Ticket', '👩🏾‍🏫 Course', '🤝🏼 Service', '🎁 Love Gift', '😶‍🌫️ Others'];
+const categories = ['👔 Business', '👩‍❤️‍👨 Relationship', '🔮 Spirituality', '🎭 Arts and Entertainment', '🏋🏽 Health and Fitness', '😶‍🌫️ Others'];
 
 const ProductDetail = ({ formik }) => {
-  const [isFreeProduct, setIsFreeProduct] = useState(false);
+  const [isCustomAmount, setIsCustomAmount] = useState(false);
 
   const handleFreeProductChange = (event) => {
     const checked = event.target.checked;
-    setIsFreeProduct(checked);
+    setIsCustomAmount(checked);
     if (checked) {
-      formik.setFieldValue('amount', 0);
-    } else {
       formik.setFieldValue('amount', '');
+    } else {
+      formik.setFieldValue('amount', formik.values.amount || '');
     }
+  };
+
+  const handleQuantityChange = (event) => {
+    const value = event.target.value;
+    formik.setFieldValue('quantity', value);
   };
 
   return (
@@ -98,6 +103,26 @@ const ProductDetail = ({ formik }) => {
             </FormHelperText>
           </FormControl>
         </Grid>
+          <Grid item xs={12}>
+            <FormControl variant="outlined" fullWidth size="small">
+              <InputLabel>Category</InputLabel>
+              <Select
+                name="category"
+                value={formik.values.category}
+                onChange={formik.handleChange}
+                error={Boolean(formik.touched.category && formik.errors.category)}
+              >
+                {categories.map((category) => (
+                  <MenuItem key={category} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </Select>
+              <FormHelperText error={Boolean(formik.touched.category && formik.errors.category)}>
+                {formik.touched.category && formik.errors.category}
+              </FormHelperText>
+            </FormControl>
+          </Grid>
         <Grid item xs={12}>
           <TextField
             name="amount"
@@ -106,42 +131,22 @@ const ProductDetail = ({ formik }) => {
             fullWidth
             size="small"
             type="number"
-            value={formik.values.amount}
+            value={isCustomAmount ? '' : formik.values.amount}
             onChange={formik.handleChange}
             error={Boolean(formik.touched.amount && formik.errors.amount)}
             helperText={formik.touched.amount && formik.errors.amount}
-            disabled={isFreeProduct}
+            disabled={isCustomAmount}
           />
           <FormControlLabel
             control={
               <Checkbox
-                checked={isFreeProduct}
+                checked={isCustomAmount}
                 onChange={handleFreeProductChange}
-                name="isFreeProduct"
+                name="isCustomAmount"
               />
             }
-            label="Free Product"
+            label="Enable Custom Amount"
           />
-        </Grid>
-        <Grid item xs={12}>
-          <FormControl variant="outlined" fullWidth size="small">
-            <InputLabel>Category</InputLabel>
-            <Select
-              name="category"
-              value={formik.values.category}
-              onChange={formik.handleChange}
-              error={Boolean(formik.touched.category && formik.errors.category)}
-            >
-              {categories.map((category) => (
-                <MenuItem key={category} value={category}>
-                  {category}
-                </MenuItem>
-              ))}
-            </Select>
-            <FormHelperText error={Boolean(formik.touched.category && formik.errors.category)}>
-              {formik.touched.category && formik.errors.category}
-            </FormHelperText>
-          </FormControl>
         </Grid>
         <Grid item xs={12}>
           <TextField
@@ -152,10 +157,15 @@ const ProductDetail = ({ formik }) => {
             size="small"
             type="number"
             value={formik.values.quantity}
-            onChange={formik.handleChange}
+            onChange={handleQuantityChange}
             error={Boolean(formik.touched.quantity && formik.errors.quantity)}
             helperText={formik.touched.quantity && formik.errors.quantity}
           />
+          {formik.values.quantity === '0' && (
+            <Typography variant="body2" color="textSecondary">
+              Quantity available: Unlimited
+            </Typography>
+          )}
         </Grid>
         <Grid item xs={12}>
             <Button
@@ -163,7 +173,7 @@ const ProductDetail = ({ formik }) => {
               component="label"
               startIcon={<UploadFile />}
             >
-              Upload File
+              Upload Product File
               <input
                 type="file"
                 hidden

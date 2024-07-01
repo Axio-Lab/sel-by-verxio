@@ -108,9 +108,13 @@ const CreateProduct = () => {
                 Back
               </Button>
               {activeStep === steps.length - 1 ? (
-                <Button onClick={formik.handleSubmit}>Submit</Button>
+                <Button 
+                  variant="contained"
+                  onClick={formik.handleSubmit}
+                >Submit</Button>
               ) : (
-                <Button onClick={formik.handleSubmit}>Next</Button>
+                <Button 
+                onClick={formik.handleSubmit}>Next</Button>
               )}
             </Grid>
           </Grid>

@@ -22,27 +22,48 @@ import Paper from '@mui/material/Paper';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
+
+const getStatusProps = (statusText) => {
+  let statusColor = { light: '', dark: '' };
+
+  switch (statusText.toLowerCase()) {
+    case 'ebook':
+      statusColor = { light: 'primary.light', dark: 'primary.dark' };
+      break;
+    case 'ticket':
+      statusColor = { light: 'orange.light', dark: 'orange.dark' };
+      break;
+    case 'others':
+      statusColor = { light: 'success.light', dark: 'success.dark' };
+      break;
+    case 'course':
+      statusColor = { light: 'secondary.light', dark: 'secondary.dark' };
+      break;
+    case 'love gift':
+      statusColor = { light: 'warning.light', dark: 'warning.dark' };
+      break;
+    case 'service':
+      statusColor = { light: 'warning.light', dark: 'warning.dark' };
+      break;
+    default:
+      statusColor = { light: 'success.light', dark: 'success.dark' };
+  }
+
+  return { statusColor};
+};
+
 // Create data function
-function createData(name, calories, fat, carbs, protein, price) {
+function createData(name, type, sales, revenue, link, createdAt, inStock, totalEarning, customers) {
   return {
     name,
-    calories,
-    fat,
-    carbs,
-    protein,
-    price,
-    history: [
-      {
-        date: '2020-01-05',
-        customerId: '11091700',
-        amount: 3,
-      },
-      {
-        date: '2020-01-02',
-        customerId: 'Anonymous',
-        amount: 1,
-      },
-    ],
+    type,
+    sales,
+    revenue,
+    link,
+    createdAt,
+    inStock,
+    totalEarning,
+    customers,
   };
 }
 
@@ -50,6 +71,7 @@ function createData(name, calories, fat, carbs, protein, price) {
 function Row(props) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
+  const { statusColor } = getStatusProps(row.type);
 
   return (
     <React.Fragment>
@@ -66,40 +88,40 @@ function Row(props) {
         <TableCell component="th" scope="row">
           {row.name}
         </TableCell>
-        <TableCell align="right">{row.calories}</TableCell>
-        <TableCell align="right">{row.fat}</TableCell>
-        <TableCell align="right">{row.carbs}</TableCell>
-        <TableCell align="right">{row.protein}</TableCell>
+        <TableCell align="right" sx={{ color: statusColor.dark }}>{row.type}</TableCell>
+        <TableCell align="right">{row.sales}</TableCell>
+        <TableCell align="right">{row.revenue}</TableCell>
+        <TableCell align="right">
+          {row.link}
+        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Typography variant="h6" gutterBottom component="div">
-                History
+                Details
               </Typography>
-              <Table size="small" aria-label="purchases">
+              <Table size="small" aria-label="details">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell align="right">Total price ($)</TableCell>
+                    <TableCell>Created At</TableCell>
+                    <TableCell>In Stock</TableCell>
+                    <TableCell align="right">Total Earning</TableCell>
+                    <TableCell align="right">Customers</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.history.map((historyRow) => (
-                    <TableRow key={historyRow.date}>
-                      <TableCell component="th" scope="row">
-                        {historyRow.date}
-                      </TableCell>
-                      <TableCell>{historyRow.customerId}</TableCell>
-                      <TableCell align="right">{historyRow.amount}</TableCell>
-                      <TableCell align="right">
-                        {Math.round(historyRow.amount * row.price * 100) / 100}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  <TableRow>
+                    <TableCell>{row.createdAt}</TableCell>
+                    <TableCell>{row.inStock}</TableCell>
+                    <TableCell align="right">{row.totalEarning}</TableCell>
+                    <TableCell align="right">
+                      <a href={row.customers} target="_blank" rel="noopener noreferrer">
+                        View Customers
+                      </a>
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </Box>
@@ -112,29 +134,25 @@ function Row(props) {
 
 Row.propTypes = {
   row: PropTypes.shape({
-    calories: PropTypes.number.isRequired,
-    carbs: PropTypes.number.isRequired,
-    fat: PropTypes.number.isRequired,
-    history: PropTypes.arrayOf(
-      PropTypes.shape({
-        amount: PropTypes.number.isRequired,
-        customerId: PropTypes.string.isRequired,
-        date: PropTypes.string.isRequired,
-      }),
-    ).isRequired,
     name: PropTypes.string.isRequired,
-    price: PropTypes.number.isRequired,
-    protein: PropTypes.number.isRequired,
+    type: PropTypes.string.isRequired,
+    sales: PropTypes.number.isRequired,
+    revenue: PropTypes.string.isRequired,
+    link: PropTypes.string.isRequired,
+    createdAt: PropTypes.string.isRequired,
+    inStock: PropTypes.number.isRequired,
+    totalEarning: PropTypes.string.isRequired,
+    customers: PropTypes.string.isRequired,
   }).isRequired,
 };
 
 // Data rows
 const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0, 3.99),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3, 4.99),
-  createData('Eclair', 262, 16.0, 24, 6.0, 3.79),
-  createData('Cupcake', 305, 3.7, 67, 4.3, 2.5),
-  createData('Gingerbread', 356, 16.0, 49, 3.9, 1.5),
+  createData('Business Mastery Mentorship', 'Ticket', 20, '$997', 'https://verxio.xyz/product/66f4223550d95f50f', '2023-01-05', 24, '$5,700', 'https://verxio.xyz/customers/66f4223550d95f50f'),
+  createData('Bonk Collections', 'Ebook', 15, '$27', 'https://verxio.xyz/product/6669845678gvbh', '2023-02-15', 15, '$405', 'https://verxio.xyz/customers/6669845678gvbh'),
+  createData('Reliance Academy', 'Course', 20, '$1,150', 'https://verxio.xyz/product/bfvgbhnjktyu6', '2023-03-10', 20, '$23,000', 'https://verxio.xyz/customers/bfvgbhnjktyu6'),
+  createData('1-0n-1 Fireside Chat', 'Service', 10, '$900', 'https://verxio.xyz/product/bfvgbh67yktyu6', '2023-04-20', 10, '$9,000', 'https://verxio.xyz/customers/bfvgbh67yktyu6'),
+  createData('Social Media Mastery for Businesses', 'Others', 50, '$50', 'https://verxio.xyz/product/bfvfghtktyu6', '2023-05-30', 50, '$2,500', 'https://verxio.xyz/customers/bfvfghtktyu6'),
 ];
 
 export default function ProductTable() {
@@ -152,18 +170,18 @@ export default function ProductTable() {
 
   return (
     <Box sx={{ marginTop: 4 }}>
-      <MainCard title="All Product 🛒">
+      <MainCard title="All Products 🛒">
         <Grid container spacing={gridSpacing}>
           <TableContainer component={Paper}>
             <Table aria-label="collapsible table">
               <TableHead>
                 <TableRow>
                   <TableCell />
-                  <TableCell>Dessert (100g serving)</TableCell>
-                  <TableCell align="right">Calories</TableCell>
-                  <TableCell align="right">Fat&nbsp;(g)</TableCell>
-                  <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-                  <TableCell align="right">Protein&nbsp;(g)</TableCell>
+                  <TableCell>Product Name</TableCell>
+                  <TableCell align="right">Type</TableCell>
+                  <TableCell align="right">Sales</TableCell>
+                  <TableCell align="right">Revenue</TableCell>
+                  <TableCell align="right">Product Link</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
