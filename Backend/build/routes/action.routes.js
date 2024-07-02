@@ -8,7 +8,7 @@ const action_controllers_1 = __importDefault(require("../controllers/action.cont
 const router = (0, express_1.Router)();
 const { getAction, postAction, } = new action_controllers_1.default();
 //get action
-router.get("/", getAction);
+router.get("/:id", getAction);
 //post action
 router.post("/", postAction);
 exports.default = router;
