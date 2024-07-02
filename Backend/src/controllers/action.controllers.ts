@@ -20,9 +20,9 @@ export default class ActionController {
 
             res.set(ACTIONS_CORS_HEADERS);
 
-            // res.header(ACTIONS_CORS_HEADERS);
+            res.header(ACTIONS_CORS_HEADERS);
 
-            return res.status(200).send({ payload })
+            return res.send({ payload })
 
         } catch (error: any) {
             return res.status(500)

@@ -10,7 +10,7 @@ const {
 } = new ProductController();
 
 //create a product
-router.post("/:userId", validateEmptyString, validate(createProductSchema), createProduct);
+router.post("/:userId", validate(createProductSchema), createProduct);
 
 //get product by Id
 router.get("/get/:id", getProductById);

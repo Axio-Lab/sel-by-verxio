@@ -34,7 +34,7 @@ const getStatusProps = (statusText) => {
     case 'ticket':
       statusColor = { light: 'orange.light', dark: 'orange.dark' };
       break;
-    case 'membership':
+    case 'others':
       statusColor = { light: 'success.light', dark: 'success.dark' };
       break;
     case 'course':
@@ -47,7 +47,7 @@ const getStatusProps = (statusText) => {
       statusColor = { light: 'warning.light', dark: 'warning.dark' };
       break;
     default:
-      statusColor = { light: 'success.light', dark: 'success.dark' };
+      statusColor = { light: 'primary.light', dark: 'success.main' };
   }
 
   return { statusColor, statusIcon };
@@ -56,7 +56,7 @@ const getStatusProps = (statusText) => {
 const salesData = [
   { title: 'Business Mastery Mentorship', amount: '$997', statusText: 'Ticket' },
   { title: 'Bonk Collections', amount: '$47', statusText: 'Ebook' },
-  { title: 'Reliance Academy', amount: '$200', statusText: 'Membership' },
+  { title: 'Reliance Academy', amount: '$200', statusText: 'Others' },
   { title: '1-0n-1 Fireside Chat', amount: '$1,997', statusText: 'Service' },
   { title: 'Social Media Mastery for Businesses', amount: '$197', statusText: 'Course' },
 ];

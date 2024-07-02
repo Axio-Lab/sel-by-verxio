@@ -9,12 +9,11 @@ import {
     Divider 
 } from '@mui/material';
 
-import MainCard from 'ui-component/cards/MainCard';
-import Grid from '@mui/material/Grid';
-import { gridSpacing } from 'store/constant';
 
 const PreviewProduct = ({ formik }) => {
   const { values } = formik;
+
+  console.log("showing Values", values)
 
   return (
     <Card>
@@ -48,7 +47,7 @@ const PreviewProduct = ({ formik }) => {
           </ListItem>
           <Divider />
           <ListItem>
-            <ListItemText primary="Quantity" secondary={values.quantity} />
+            <ListItemText primary="Quantity" secondary={values.quantity === '0' ? 'Unlimited' : values.quantity}  />
           </ListItem>
           <Divider />
           <ListItem>
