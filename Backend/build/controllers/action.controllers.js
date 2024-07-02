@@ -28,8 +28,8 @@ class ActionController {
                     title: `Buy ${product === null || product === void 0 ? void 0 : product.name}`,
                 };
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
-                // res.header(ACTIONS_CORS_HEADERS);
-                return res.status(200).send({ payload });
+                res.header(actions_1.ACTIONS_CORS_HEADERS);
+                return res.send({ payload });
             }
             catch (error) {
                 return res.status(500)
