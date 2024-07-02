@@ -126,7 +126,7 @@ const ProductDetail = ({ formik }) => {
         <Grid item xs={12}>
           <TextField
             name="amount"
-            label="Amount"
+            label="Amount ($)"
             variant="outlined"
             fullWidth
             size="small"

@@ -35,7 +35,7 @@ const getStatusProps = (statusText) => {
       statusColor = { light: 'orange.light', dark: 'orange.dark' };
       break;
     case 'others':
-      statusColor = { light: 'success.light', dark: 'success.' };
+      statusColor = { light: 'success.light', dark: 'success.dark' };
       break;
     case 'course':
       statusColor = { light: 'secondary.light', dark: 'secondary.dark' };
@@ -47,7 +47,7 @@ const getStatusProps = (statusText) => {
       statusColor = { light: 'warning.light', dark: 'warning.dark' };
       break;
     default:
-      statusColor = { light: 'success.light', dark: 'success.dark' };
+      statusColor = { light: 'primary.light', dark: 'success.main' };
   }
 
   return { statusColor, statusIcon };

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import MainCard from 'ui-component/cards/MainCard';
@@ -52,6 +53,7 @@ const getStatusProps = (statusText) => {
   return { statusColor};
 };
 
+
 // Create data function
 function createData(name, type, sales, revenue, link, createdAt, inStock, totalEarning, customers) {
   return {
@@ -88,9 +90,9 @@ function Row(props) {
         <TableCell component="th" scope="row">
           {row.name}
         </TableCell>
-        <TableCell align="right" sx={{ color: statusColor.dark }}>{row.type}</TableCell>
-        <TableCell align="right">{row.sales}</TableCell>
-        <TableCell align="right">{row.revenue}</TableCell>
+        <TableCell align="center" sx={{ color: statusColor.dark }}>{row.type}</TableCell>
+        <TableCell align="center">{row.sales}</TableCell>
+        <TableCell align="center">{row.revenue}</TableCell>
         <TableCell align="right">
           {row.link}
         </TableCell>
@@ -106,20 +108,21 @@ function Row(props) {
                 <TableHead>
                   <TableRow>
                     <TableCell>Created At</TableCell>
-                    <TableCell>In Stock</TableCell>
-                    <TableCell align="right">Total Earning</TableCell>
-                    <TableCell align="right">Customers</TableCell>
+                    <TableCell align='center'>In Stock</TableCell>
+                    <TableCell align="center">Total Earning</TableCell>
+                    <TableCell align="center">Customers</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   <TableRow>
                     <TableCell>{row.createdAt}</TableCell>
-                    <TableCell>{row.inStock}</TableCell>
-                    <TableCell align="right">{row.totalEarning}</TableCell>
-                    <TableCell align="right">
-                      <a href={row.customers} target="_blank" rel="noopener noreferrer">
+                    <TableCell align='center'>{row.inStock}</TableCell>
+                    <TableCell align="center">{row.totalEarning}</TableCell>
+                    <TableCell align="center">
+                      {/* <a href={row.customers} target="_blank" rel="noopener noreferrer">
                         View Customers
-                      </a>
+                      </a> */}
+                      <Link to={`/explore/customers/${row.name}`}>View Customers</Link>
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -178,9 +181,9 @@ export default function ProductTable() {
                 <TableRow>
                   <TableCell />
                   <TableCell>Product Name</TableCell>
-                  <TableCell align="right">Type</TableCell>
-                  <TableCell align="right">Sales</TableCell>
-                  <TableCell align="right">Revenue</TableCell>
+                  <TableCell align="center">Type</TableCell>
+                  <TableCell align="center">Sales</TableCell>
+                  <TableCell align="center">Revenue</TableCell>
                   <TableCell align="right">Product Link</TableCell>
                 </TableRow>
               </TableHead>

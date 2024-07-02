@@ -11,6 +11,7 @@ const DashboardDefault = Loadable(lazy(() => import('views/dashboard')));
 const Products = Loadable(lazy(() => import('explore/ProductTable')))
 const CreateProduct = Loadable(lazy(() => import('explore/CreateProduct')))
 const MyItems = Loadable(lazy(() => import('explore/MyItems')))
+const Customers= Loadable(lazy(() => import('explore/Customers')))
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -55,6 +56,15 @@ const MainRoutes = {
         {
           path: 'items',
           element: <MyItems/>
+        }
+      ]
+    },
+    {
+      path: 'explore',
+      children: [
+        {
+          path: 'customers/:productName',
+          element: <Customers/>
         }
       ]
     },
