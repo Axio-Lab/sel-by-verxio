@@ -22,7 +22,7 @@ export default class ActionController {
 
             res.header(ACTIONS_CORS_HEADERS);
 
-            return res.send({ payload })
+            return res.json(payload)
 
         } catch (error: any) {
             return res.status(500)
