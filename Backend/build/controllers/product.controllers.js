@@ -39,7 +39,7 @@ class ProductController {
     getProductById(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const product = yield getProductById(req.params.productId);
+                const product = yield getProductById(req.params.id);
                 if (!product) {
                     return res.status(404)
                         .send({
