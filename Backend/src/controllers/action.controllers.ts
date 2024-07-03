@@ -56,7 +56,9 @@ export default class ActionController {
     async postAction(req: Request, res: Response) {
         try {
             const requestUrl = new URL(req.url);
-            const { amount, toPubkey } = validatedQueryParams(requestUrl);
+            const productId = requestUrl.pathname.split("/").pop();
+            const product = await getProductById(productId as unknown as string);
+            const { toPubkey } = validatedQueryParams(requestUrl);
 
             const body: ActionPostRequest = await req.json();
 
@@ -79,9 +81,10 @@ export default class ActionController {
             const minimumBalance = await connection.getMinimumBalanceForRentExemption(
               0, // note: simple accounts that just store native SOL have `0` bytes of data
             );
-            if (amount * LAMPORTS_PER_SOL < minimumBalance) {
-              throw `account may not be rent exempt: ${toPubkey.toBase58()}`;
-            }
+
+            if (product?.price! * LAMPORTS_PER_SOL < minimumBalance) {
+                throw `account may not be rent exempt: ${toPubkey.toBase58()}`;
+              }
 
             const transaction = new Transaction();
 
@@ -90,19 +93,18 @@ export default class ActionController {
               SystemProgram.transfer({
                 fromPubkey: account,
                 toPubkey: SELLER_SOL_ADDRESS,
-                lamports: Math.floor(amount * LAMPORTS_PER_SOL * 0.9),
+                lamports: Math.floor(product?.price! * LAMPORTS_PER_SOL * 0.9),
               }),
             );
 
             // Transfer 10% of the funds to the default SOL address
             transaction.add(
-              SystemProgram.transfer({
-                fromPubkey: account,
-                toPubkey: DEFAULT_SOL_ADDRESS,
-                lamports: Math.floor(amount * LAMPORTS_PER_SOL * 0.1),
-              }),
-            );
-
+                SystemProgram.transfer({
+                  fromPubkey: account,
+                  toPubkey: DEFAULT_SOL_ADDRESS,
+                  lamports: Math.floor(product?.price! * LAMPORTS_PER_SOL * 0.1),
+                }),
+              );
             // set the end user as the fee payer
             transaction.feePayer = account;
 
@@ -110,10 +112,11 @@ export default class ActionController {
               await connection.getLatestBlockhash()
             ).blockhash;
 
+            
             const payload: ActionPostResponse = {
               fields: {
                 transaction,
-                message: `Send ${amount} SOL (90% to seller, 10% to default SOL address)`,
+                message: `You've successfully purchased ${product?.name} for ${product?.price} SOL 🎊`,
               },
             };
 
@@ -131,26 +134,15 @@ export default class ActionController {
 }
 
 function validatedQueryParams(requestUrl: URL) {
-  let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
-  let amount: number = 0; //This should be the price of the product
-
-  try {
-    if (requestUrl.searchParams.get("to")) {
-      toPubkey = new PublicKey(requestUrl.searchParams.get("to")!);
+    let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
+  
+    try {
+      if (requestUrl.searchParams.get("to")) {
+        toPubkey = new PublicKey(requestUrl.searchParams.get("to")!);
+      }
+    } catch (err) {
+      throw "Invalid input query parameter: to";
     }
-  } catch (err) {
-    throw "Invalid input query parameter: to";
+  
+    return { toPubkey };
   }
-
-  try {
-    if (requestUrl.searchParams.get("amount")) {
-      amount = parseFloat(requestUrl.searchParams.get("amount")!);
-    }
-
-    if (amount <= 0) throw "amount is too small";
-  } catch (err) {
-    throw "Invalid input query parameter: amount";
-  }
-
-  return { amount, toPubkey };
-}
