@@ -51,7 +51,8 @@ class ProductController {
                     .send({
                     success: true,
                     message: "Product fetched successfully",
-                    product
+                    product,
+                    blink: `/api/v1/action/${product._id}`
                 });
             }
             catch (error) {

@@ -7,7 +7,7 @@ const {
 } = new ActionController();
 
 //get action
-router.get("/", getAction);
+router.get("/:id", getAction);
 
 //post action
 router.post("/", postAction);

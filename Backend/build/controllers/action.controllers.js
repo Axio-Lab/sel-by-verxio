@@ -19,8 +19,8 @@ class ActionController {
     getAction(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // const productId = req.originalUrl.split("/").pop;
-                const product = yield getProductById("6683d1f3990c844d4b56fa06");
+                const productId = req.originalUrl.split("/").pop();
+                const product = yield getProductById(productId);
                 const payload = {
                     icon: product === null || product === void 0 ? void 0 : product.image,
                     label: `Buy ${product === null || product === void 0 ? void 0 : product.name}`,
@@ -28,7 +28,6 @@ class ActionController {
                     title: `Buy ${product === null || product === void 0 ? void 0 : product.name}`,
                 };
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
-                res.header(actions_1.ACTIONS_CORS_HEADERS);
                 return res.json(payload);
             }
             catch (error) {
