@@ -28,7 +28,7 @@ export default class ProductController {
 
     async getProductById(req: Request, res: Response) {
         try {
-            const product = await getProductById(req.params.productId);
+            const product = await getProductById(req.params.id);
 
             if(!product) {
                 return res.status(404)

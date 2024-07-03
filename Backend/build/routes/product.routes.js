@@ -12,5 +12,5 @@ const { createProduct, getProductById, } = new product_controllers_1.default();
 //create a product
 router.post("/:userId", (0, validate_middleware_1.default)(product_schema_1.createProductSchema), createProduct);
 //get product by Id
-router.get("/get/:id", getProductById);
+router.get("/:id", getProductById);
 exports.default = router;
