@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const product_servicee_1 = __importDefault(require("../services/product.servicee"));
 const { create, getProductById } = new product_servicee_1.default();
+const deployedLink = "https://sel-by-verxio.onrender.com";
 class ProductController {
     createProduct(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -24,7 +25,7 @@ class ProductController {
                     success: true,
                     message: "Product created successfully",
                     product,
-                    blink: `/api/v1/action/${product._id}`
+                    blink: `${deployedLink}/api/v1/action/${product._id}`
                 });
             }
             catch (error) {
@@ -52,7 +53,7 @@ class ProductController {
                     success: true,
                     message: "Product fetched successfully",
                     product,
-                    blink: `/api/v1/action/${product._id}`
+                    blink: `${deployedLink}/api/v1/action/${product._id}`
                 });
             }
             catch (error) {
