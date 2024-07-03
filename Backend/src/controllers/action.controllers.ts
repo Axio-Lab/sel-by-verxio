@@ -8,8 +8,8 @@ const {
 export default class ActionController {
     async getAction(req: Request, res: Response) {
         try {
-            const productId = req.originalUrl.split("/").pop;
-            const product = await getProductById(productId as unknown as string);
+            // const productId = req.originalUrl.split("/").pop;
+            const product = await getProductById("6683d1f3990c844d4b56fa06");
 
             const payload: ActionGetResponse = {
                 icon: product?.image as unknown as string,
@@ -22,7 +22,7 @@ export default class ActionController {
 
             res.header(ACTIONS_CORS_HEADERS);
 
-            return res.send({ payload })
+            return res.json(payload)
 
         } catch (error: any) {
             return res.status(500)
