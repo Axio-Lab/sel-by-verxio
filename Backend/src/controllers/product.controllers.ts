@@ -4,6 +4,7 @@ const {
     create,
     getProductById
 } = new ProductService();
+const deployedLink = "https://sel-by-verxio.onrender.com";
 
 export default class ProductController {
     async createProduct(req: Request, res: Response) {
@@ -15,7 +16,7 @@ export default class ProductController {
                     success: true,
                     message: "Product created successfully",
                     product,
-                    blink: `/api/v1/action/${product._id}`
+                    blink: `${deployedLink}/api/v1/action/${product._id}`
                 })
         } catch (error: any) {
             return res.status(500)
@@ -42,7 +43,7 @@ export default class ProductController {
                     success: true,
                     message: "Product fetched successfully",
                     product,
-                    blink: `/api/v1/action/${product._id}`
+                    blink: `${deployedLink}/api/v1/action/${product._id}`
                 })
         } catch (error: any) {
             return res.status(500)
