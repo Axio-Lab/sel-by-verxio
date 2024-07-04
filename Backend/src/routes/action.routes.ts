@@ -10,6 +10,6 @@ const {
 router.get("/:id", getAction);
 
 //post action
-router.post("/", postAction);
+router.post("/:id", postAction);
 
 export default router;
