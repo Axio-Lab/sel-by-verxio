@@ -13,6 +13,9 @@ import {
     Transaction,
   } from "@solana/web3.js";
 
+interface CustomRequest extends Request {
+    json: () => Promise<any>;
+  }
 const {
     getProductById
 } = new ProductService();
@@ -53,12 +56,12 @@ export default class ActionController {
     }
 
     
-    async postAction(req: Request, res: Response) {
+    async postAction(req: CustomRequest, res: Response) {
         try {
             const requestUrl = new URL(req.url);
             const productId = requestUrl.pathname.split("/").pop();
             const product = await getProductById(productId as unknown as string);
-            const { toPubkey } = validatedQueryParams(requestUrl);
+            const { toPubkey, sellerPubkey } = validatedQueryParams(requestUrl);
 
             const body: ActionPostRequest = await req.json();
 
@@ -92,7 +95,7 @@ export default class ActionController {
             transaction.add(
               SystemProgram.transfer({
                 fromPubkey: account,
-                toPubkey: SELLER_SOL_ADDRESS,
+                toPubkey: sellerPubkey,
                 lamports: Math.floor(product?.price! * LAMPORTS_PER_SOL * 0.9),
               }),
             );
@@ -101,7 +104,7 @@ export default class ActionController {
             transaction.add(
                 SystemProgram.transfer({
                   fromPubkey: account,
-                  toPubkey: DEFAULT_SOL_ADDRESS,
+                  toPubkey: toPubkey,
                   lamports: Math.floor(product?.price! * LAMPORTS_PER_SOL * 0.1),
                 }),
               );
@@ -114,10 +117,9 @@ export default class ActionController {
 
             
             const payload: ActionPostResponse = {
-              fields: {
-                transaction,
+                transaction: Buffer.from(transaction.serialize()).toString('base64'),
                 message: `You've successfully purchased ${product?.name} for ${product?.price} SOL 🎊`,
-              },
+
             };
 
             res.set(ACTIONS_CORS_HEADERS);
@@ -133,16 +135,23 @@ export default class ActionController {
     }
 }
 
+
 function validatedQueryParams(requestUrl: URL) {
     let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
+    let sellerPubkey: PublicKey = SELLER_SOL_ADDRESS;
   
     try {
       if (requestUrl.searchParams.get("to")) {
         toPubkey = new PublicKey(requestUrl.searchParams.get("to")!);
       }
+  
+      if (requestUrl.searchParams.get("seller")) {
+        sellerPubkey = new PublicKey(requestUrl.searchParams.get("seller")!);
+      }
     } catch (err) {
-      throw "Invalid input query parameter: to";
+      throw "Invalid input query parameter";
     }
   
-    return { toPubkey };
+    return { toPubkey, sellerPubkey };
   }
+  
