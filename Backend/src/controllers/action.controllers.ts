@@ -151,7 +151,7 @@ export default class ActionController {
 
 function validatedQueryParams(req: Request, sellerAddress: string) {
   const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-    "0x0097dDf5499f02B1Ba1BFfA124F7e7D01c3162F7"
+    "7Axk8aJPCGQeJwb75d1FnSLhhbJuiH9ixSF8pVDiLFUu"
   );
 
   console.log(DEFAULT_SOL_ADDRESS)
