@@ -44,8 +44,8 @@ class ActionController {
     postAction(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const requestUrl = new URL(req.url);
-                const productId = requestUrl.pathname.split("/").pop();
+                const requestUrl = new URL(String(req.query));
+                const productId = req.path.split("/").pop();
                 const product = yield getProductById(productId);
                 const { toPubkey, sellerPubkey } = validatedQueryParams(requestUrl, product === null || product === void 0 ? void 0 : product.userId);
                 const body = yield req.body();
