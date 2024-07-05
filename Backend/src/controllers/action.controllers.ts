@@ -54,7 +54,7 @@ export default class ActionController {
       const product = await getProductById(productId as unknown as string);
       const { toPubkey, sellerPubkey } = validatedQueryParams(req, product?.userId!);
 
-      const body: ActionPostRequest = await req.body();
+      const body: ActionPostRequest = req.body;
 
       // validate the client provided input
       let account: PublicKey;
