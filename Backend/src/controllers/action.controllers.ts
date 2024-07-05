@@ -50,8 +50,8 @@ export default class ActionController {
 
   async postAction(req: Request, res: Response) {
     try {
-      const requestUrl = new URL(req.url);
-      const productId = requestUrl.pathname.split("/").pop();
+      const requestUrl = new URL(String(req.query));
+      const productId = req.path.split("/").pop();
       const product = await getProductById(productId as unknown as string);
       const { toPubkey, sellerPubkey } = validatedQueryParams(requestUrl, product?.userId!);
 

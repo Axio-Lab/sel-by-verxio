@@ -10,5 +10,5 @@ const { getAction, postAction, } = new action_controllers_1.default();
 //get action
 router.get("/:id", getAction);
 //post action
-router.post("/", postAction);
+router.post("/:id", postAction);
 exports.default = router;
