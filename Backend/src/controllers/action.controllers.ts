@@ -47,7 +47,6 @@ export default class ActionController {
     }
   }
 
-
   async postAction(req: Request, res: Response) {
     try {
       const productId = req.path.split("/").pop();
@@ -152,8 +151,10 @@ export default class ActionController {
 
 function validatedQueryParams(req: Request, sellerAddress: string) {
   const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-    sellerAddress, // SEL wallet
+    "0x0097dDf5499f02B1Ba1BFfA124F7e7D01c3162F7"
   );
+
+  console.log(DEFAULT_SOL_ADDRESS)
 
   let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
   let sellerPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
