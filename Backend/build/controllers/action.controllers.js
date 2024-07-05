@@ -118,7 +118,8 @@ exports.default = ActionController;
 //   return { toPubkey, sellerPubkey };
 // }
 function validatedQueryParams(req, sellerAddress) {
-    const DEFAULT_SOL_ADDRESS = new web3_js_1.PublicKey(sellerAddress);
+    const DEFAULT_SOL_ADDRESS = new web3_js_1.PublicKey("0x0097dDf5499f02B1Ba1BFfA124F7e7D01c3162F7");
+    console.log(DEFAULT_SOL_ADDRESS);
     let toPubkey = DEFAULT_SOL_ADDRESS;
     let sellerPubkey = DEFAULT_SOL_ADDRESS;
     try {
