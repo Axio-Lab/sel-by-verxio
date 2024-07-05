@@ -44,10 +44,9 @@ class ActionController {
     postAction(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const requestUrl = new URL(String(req.query));
                 const productId = req.path.split("/").pop();
                 const product = yield getProductById(productId);
-                const { toPubkey, sellerPubkey } = validatedQueryParams(requestUrl, product === null || product === void 0 ? void 0 : product.userId);
+                const { toPubkey, sellerPubkey } = validatedQueryParams(req, product === null || product === void 0 ? void 0 : product.userId);
                 const body = yield req.body();
                 // validate the client provided input
                 let account;
@@ -100,20 +99,46 @@ class ActionController {
     }
 }
 exports.default = ActionController;
-function validatedQueryParams(requestUrl, sellerAddress) {
+// function validatedQueryParams(requestUrl: URL, sellerAddress: string) {
+//   const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
+//     sellerAddress, // SEL wallet
+//   );
+//   let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
+//   let sellerPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
+//   try {
+//     if (requestUrl.searchParams.get("to")) {
+//       toPubkey = new PublicKey(requestUrl.searchParams.get("to")!);
+//     }
+//     if (requestUrl.searchParams.get("seller")) {
+//       sellerPubkey = new PublicKey(requestUrl.searchParams.get("seller")!);
+//     }
+//   } catch (err) {
+//     throw "Invalid input query parameter";
+//   }
+//   return { toPubkey, sellerPubkey };
+// }
+function validatedQueryParams(req, sellerAddress) {
     const DEFAULT_SOL_ADDRESS = new web3_js_1.PublicKey(sellerAddress);
     let toPubkey = DEFAULT_SOL_ADDRESS;
     let sellerPubkey = DEFAULT_SOL_ADDRESS;
     try {
-        if (requestUrl.searchParams.get("to")) {
-            toPubkey = new web3_js_1.PublicKey(requestUrl.searchParams.get("to"));
-        }
-        if (requestUrl.searchParams.get("seller")) {
-            sellerPubkey = new web3_js_1.PublicKey(requestUrl.searchParams.get("seller"));
+        if (req.query.to) {
+            toPubkey = new web3_js_1.PublicKey(req.query.to);
         }
     }
     catch (err) {
-        throw "Invalid input query parameter";
+        throw "Invalid input query parameter: to";
     }
-    return { toPubkey, sellerPubkey };
+    try {
+        if (req.query.seller) {
+            sellerPubkey = new web3_js_1.PublicKey(req.query.seller);
+        }
+    }
+    catch (err) {
+        throw "Invalid input query parameter: to";
+    }
+    return {
+        toPubkey,
+        sellerPubkey,
+    };
 }

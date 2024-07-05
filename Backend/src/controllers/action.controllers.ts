@@ -50,10 +50,9 @@ export default class ActionController {
 
   async postAction(req: Request, res: Response) {
     try {
-      const requestUrl = new URL(String(req.query));
       const productId = req.path.split("/").pop();
       const product = await getProductById(productId as unknown as string);
-      const { toPubkey, sellerPubkey } = validatedQueryParams(requestUrl, product?.userId!);
+      const { toPubkey, sellerPubkey } = validatedQueryParams(req, product?.userId!);
 
       const body: ActionPostRequest = await req.body();
 
@@ -128,25 +127,55 @@ export default class ActionController {
 }
 
 
-function validatedQueryParams(requestUrl: URL, sellerAddress: string) {
+// function validatedQueryParams(requestUrl: URL, sellerAddress: string) {
+//   const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
+//     sellerAddress, // SEL wallet
+//   );
+  
+//   let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
+//   let sellerPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
+
+//   try {
+//     if (requestUrl.searchParams.get("to")) {
+//       toPubkey = new PublicKey(requestUrl.searchParams.get("to")!);
+//     }
+
+//     if (requestUrl.searchParams.get("seller")) {
+//       sellerPubkey = new PublicKey(requestUrl.searchParams.get("seller")!);
+//     }
+//   } catch (err) {
+//     throw "Invalid input query parameter";
+//   }
+
+//   return { toPubkey, sellerPubkey };
+// }
+
+function validatedQueryParams(req: Request, sellerAddress: string) {
   const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
     sellerAddress, // SEL wallet
   );
-  
+
   let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
   let sellerPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
 
   try {
-    if (requestUrl.searchParams.get("to")) {
-      toPubkey = new PublicKey(requestUrl.searchParams.get("to")!);
-    }
-
-    if (requestUrl.searchParams.get("seller")) {
-      sellerPubkey = new PublicKey(requestUrl.searchParams.get("seller")!);
+    if (req.query.to) {
+      toPubkey = new PublicKey(req.query.to as string);
     }
   } catch (err) {
-    throw "Invalid input query parameter";
+    throw "Invalid input query parameter: to";
   }
 
-  return { toPubkey, sellerPubkey };
+  try {
+    if (req.query.seller) {
+      sellerPubkey = new PublicKey(req.query.seller as string);
+    }
+  } catch (err) {
+    throw "Invalid input query parameter: to";
+  }
+
+  return {
+    toPubkey,
+    sellerPubkey,
+  };
 }
