@@ -47,7 +47,7 @@ class ActionController {
                 const productId = req.path.split("/").pop();
                 const product = yield getProductById(productId);
                 const { toPubkey, sellerPubkey } = validatedQueryParams(req, product === null || product === void 0 ? void 0 : product.userId);
-                const body = yield req.body();
+                const body = req.body;
                 // validate the client provided input
                 let account;
                 try {
