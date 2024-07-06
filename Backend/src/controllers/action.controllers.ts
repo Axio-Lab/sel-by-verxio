@@ -29,7 +29,7 @@ export default class ActionController {
 
       const payload: ActionGetResponse = {
         icon: product?.image as unknown as string,
-        label: `Buy Now (${product?.name} SOL)`,
+        label: `Buy Now (${product?.price} SOL)`,
         description: `${product?.description}`,
         title: `${product?.name}`,
       }
@@ -56,6 +56,7 @@ export default class ActionController {
 
       const body: ActionPostRequest = req.body;
 
+      console.log(body)
       // validate the client provided input
       let account: PublicKey;
       try {
