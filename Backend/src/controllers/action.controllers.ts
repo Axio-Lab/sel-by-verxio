@@ -56,7 +56,6 @@ export default class ActionController {
 
       const body: ActionPostRequest = req.body;
 
-      console.log(body)
       // validate the client provided input
       let account: PublicKey;
       try {
@@ -131,15 +130,15 @@ export default class ActionController {
 }
 
 function validatedQueryParams(req: Request, sellerAddress: string) {
-  const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-    sellerAddress as string
-  );
-
-  console.log(DEFAULT_SOL_ADDRESS)
+  // const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
+  //   sellerAddress as string
+  // );
 
   let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
-  let sellerPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
-
+  let sellerPubkey: PublicKey = new PublicKey(
+    sellerAddress as string
+  );;
+ 
   try {
     if (req.query.to) {
       toPubkey = new PublicKey(req.query.to as string);
