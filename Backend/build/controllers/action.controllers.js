@@ -25,7 +25,7 @@ class ActionController {
                 const product = yield getProductById(productId);
                 const payload = {
                     icon: product === null || product === void 0 ? void 0 : product.image,
-                    label: `Buy Now (${product === null || product === void 0 ? void 0 : product.name} SOL)`,
+                    label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
                     description: `${product === null || product === void 0 ? void 0 : product.description}`,
                     title: `${product === null || product === void 0 ? void 0 : product.name}`,
                 };
@@ -100,10 +100,12 @@ class ActionController {
 }
 exports.default = ActionController;
 function validatedQueryParams(req, sellerAddress) {
-    const DEFAULT_SOL_ADDRESS = new web3_js_1.PublicKey(sellerAddress);
-    console.log(DEFAULT_SOL_ADDRESS);
+    // const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
+    //   sellerAddress as string
+    // );
     let toPubkey = DEFAULT_SOL_ADDRESS;
-    let sellerPubkey = DEFAULT_SOL_ADDRESS;
+    let sellerPubkey = new web3_js_1.PublicKey(sellerAddress);
+    ;
     try {
         if (req.query.to) {
             toPubkey = new web3_js_1.PublicKey(req.query.to);
