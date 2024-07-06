@@ -8,6 +8,7 @@ const {
 
 //get action
 router.get("/:id", getAction);
+router.options("/:id", getAction);
 
 //post action
 router.post("/:id", postAction);

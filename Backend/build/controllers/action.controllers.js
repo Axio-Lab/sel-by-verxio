@@ -82,9 +82,14 @@ class ActionController {
                 transaction.feePayer = account;
                 transaction.recentBlockhash = (yield connection.getLatestBlockhash()).blockhash;
                 const payload = {
-                    transaction: Buffer.from(transaction.serialize()).toString('base64'),
+                    transaction: transaction.serialize({
+                        requireAllSignatures: false,
+                        verifySignatures: true,
+                    }).toString('base64'),
                     message: `You've successfully purchased ${product === null || product === void 0 ? void 0 : product.name} for ${product === null || product === void 0 ? void 0 : product.price} SOL 🎊`,
                 };
+                console.log("Transaction: ", transaction);
+                console.log("Payload: ", payload);
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
                 return res.json(payload);
             }
