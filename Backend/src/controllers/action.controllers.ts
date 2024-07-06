@@ -115,6 +115,8 @@ export default class ActionController {
         }).toString('base64'),
         message: `You've successfully purchased ${product?.name} for ${product?.price} SOL 🎊`,
       };
+      console.log("Transaction: ",transaction)
+      console.log("Payload: ",payload)
 
       res.set(ACTIONS_CORS_HEADERS);
       return res.json(payload);
