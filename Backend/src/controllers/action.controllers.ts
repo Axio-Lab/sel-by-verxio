@@ -51,6 +51,7 @@ export default class ActionController {
     try {
       const productId = req.originalUrl.split("/").pop();
       const product = await getProductById(productId as unknown as string);
+      console.log(product)
       const { toPubkey, sellerPubkey } = validatedQueryParams(req, product?.userId!);
 
       const body: ActionPostRequest = req.body;
@@ -126,8 +127,9 @@ export default class ActionController {
 }
 
 function validatedQueryParams(req: Request, sellerAddress: string) {
+  console.log(sellerAddress)
   const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-    sellerAddress
+    sellerAddress as string
   );
 
   console.log(DEFAULT_SOL_ADDRESS)
