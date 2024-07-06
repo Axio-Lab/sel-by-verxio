@@ -44,7 +44,7 @@ class ActionController {
     postAction(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const productId = req.path.split("/").pop();
+                const productId = req.originalUrl.split("/").pop();
                 const product = yield getProductById(productId);
                 const { toPubkey, sellerPubkey } = validatedQueryParams(req, product === null || product === void 0 ? void 0 : product.userId);
                 const body = req.body;
@@ -99,26 +99,8 @@ class ActionController {
     }
 }
 exports.default = ActionController;
-// function validatedQueryParams(requestUrl: URL, sellerAddress: string) {
-//   const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-//     sellerAddress, // SEL wallet
-//   );
-//   let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
-//   let sellerPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
-//   try {
-//     if (requestUrl.searchParams.get("to")) {
-//       toPubkey = new PublicKey(requestUrl.searchParams.get("to")!);
-//     }
-//     if (requestUrl.searchParams.get("seller")) {
-//       sellerPubkey = new PublicKey(requestUrl.searchParams.get("seller")!);
-//     }
-//   } catch (err) {
-//     throw "Invalid input query parameter";
-//   }
-//   return { toPubkey, sellerPubkey };
-// }
 function validatedQueryParams(req, sellerAddress) {
-    const DEFAULT_SOL_ADDRESS = new web3_js_1.PublicKey("7Axk8aJPCGQeJwb75d1FnSLhhbJuiH9ixSF8pVDiLFUu");
+    const DEFAULT_SOL_ADDRESS = new web3_js_1.PublicKey(sellerAddress);
     console.log(DEFAULT_SOL_ADDRESS);
     let toPubkey = DEFAULT_SOL_ADDRESS;
     let sellerPubkey = DEFAULT_SOL_ADDRESS;
