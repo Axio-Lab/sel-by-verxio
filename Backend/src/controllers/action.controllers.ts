@@ -49,7 +49,7 @@ export default class ActionController {
 
   async postAction(req: Request, res: Response) {
     try {
-      const productId = req.path.split("/").pop();
+      const productId = req.originalUrl.split("/").pop();
       const product = await getProductById(productId as unknown as string);
       const { toPubkey, sellerPubkey } = validatedQueryParams(req, product?.userId!);
 
@@ -125,33 +125,9 @@ export default class ActionController {
   }
 }
 
-
-// function validatedQueryParams(requestUrl: URL, sellerAddress: string) {
-//   const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-//     sellerAddress, // SEL wallet
-//   );
-  
-//   let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
-//   let sellerPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
-
-//   try {
-//     if (requestUrl.searchParams.get("to")) {
-//       toPubkey = new PublicKey(requestUrl.searchParams.get("to")!);
-//     }
-
-//     if (requestUrl.searchParams.get("seller")) {
-//       sellerPubkey = new PublicKey(requestUrl.searchParams.get("seller")!);
-//     }
-//   } catch (err) {
-//     throw "Invalid input query parameter";
-//   }
-
-//   return { toPubkey, sellerPubkey };
-// }
-
 function validatedQueryParams(req: Request, sellerAddress: string) {
   const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-    "7Axk8aJPCGQeJwb75d1FnSLhhbJuiH9ixSF8pVDiLFUu"
+    sellerAddress
   );
 
   console.log(DEFAULT_SOL_ADDRESS)
