@@ -110,7 +110,10 @@ export default class ActionController {
 
 
       const payload: ActionPostResponse = {
-        transaction: Buffer.from(transaction.serialize()).toString('base64'),
+        transaction: transaction.serialize({
+          requireAllSignatures: false,
+          verifySignatures: true,
+        }).toString('base64'),
         message: `You've successfully purchased ${product?.name} for ${product?.price} SOL 🎊`,
       };
 

@@ -55,12 +55,12 @@ const getStatusProps = (statusText) => {
 
 
 // Create data function
-function createData(name, type, sales, revenue, link, createdAt, inStock, totalEarning, customers) {
+function createData(name, type, sales, amount, link, createdAt, inStock, totalEarning, customers) {
   return {
     name,
     type,
     sales,
-    revenue,
+    amount,
     link,
     createdAt,
     inStock,
@@ -108,8 +108,8 @@ function Row(props) {
                 <TableHead>
                   <TableRow>
                     <TableCell>Created At</TableCell>
-                    <TableCell align='center'>In Stock</TableCell>
-                    <TableCell align="center">Total Earning</TableCell>
+                    <TableCell align='center'>Sales</TableCell>
+                    <TableCell align="center">Revenue</TableCell>
                     <TableCell align="center">Customers</TableCell>
                   </TableRow>
                 </TableHead>
@@ -182,8 +182,8 @@ export default function ProductTable() {
                   <TableCell />
                   <TableCell>Product Name</TableCell>
                   <TableCell align="center">Type</TableCell>
-                  <TableCell align="center">Sales</TableCell>
-                  <TableCell align="center">Revenue</TableCell>
+                  <TableCell align="center">In Stock</TableCell>
+                  <TableCell align="center">Amount</TableCell>
                   <TableCell align="right">Product Link</TableCell>
                 </TableRow>
               </TableHead>
