@@ -46,7 +46,6 @@ class ActionController {
             try {
                 const productId = req.originalUrl.split("/").pop();
                 const product = yield getProductById(productId);
-                console.log(product);
                 const { toPubkey, sellerPubkey } = validatedQueryParams(req, product === null || product === void 0 ? void 0 : product.userId);
                 const body = req.body;
                 // validate the client provided input
@@ -101,7 +100,6 @@ class ActionController {
 }
 exports.default = ActionController;
 function validatedQueryParams(req, sellerAddress) {
-    console.log(sellerAddress);
     const DEFAULT_SOL_ADDRESS = new web3_js_1.PublicKey(sellerAddress);
     console.log(DEFAULT_SOL_ADDRESS);
     let toPubkey = DEFAULT_SOL_ADDRESS;
