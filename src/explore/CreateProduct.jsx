@@ -29,7 +29,7 @@ const CreateProduct = () => {
   const formik = useFormik({
     initialValues: {
       name: '',
-      productImage: null,
+      productImage: "",
       description: '',
       productType: '',
       amount: '',

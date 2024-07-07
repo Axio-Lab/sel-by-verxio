@@ -19,6 +19,7 @@ const categories = ['👔 Business', '👩‍❤️‍👨 Relationship', '🔮 
 
 const ProductDetail = ({ formik }) => {
   const [isCustomAmount, setIsCustomAmount] = useState(false);
+  // const [selectedImage, setSelectedImage] = useState(null)
 
   const handleFreeProductChange = (event) => {
     const checked = event.target.checked;
@@ -33,6 +34,34 @@ const ProductDetail = ({ formik }) => {
   const handleQuantityChange = (event) => {
     const value = event.target.value;
     formik.setFieldValue('quantity', value);
+  };
+
+  const handleImageChange = async (event, setFieldValue) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // setSelectedImage(URL.createObjectURL(file));
+    await getImageDataUrl(file, setFieldValue);
+  };
+
+  const getImageDataUrl = async (file, setFieldValue) => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'Ibelachi_Test_Run');
+    formData.append('api_key', '968631257356497');
+
+    try {
+      const response = await fetch('https://api.cloudinary.com/v1_1/verxioaventor/image/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const results = await response.json();
+      setFieldValue('bannerImg', results.url);
+    } catch (error) {
+      console.log('Error uploading image:', error);
+    }
   };
 
   return (
@@ -52,16 +81,17 @@ const ProductDetail = ({ formik }) => {
           />
         </Grid>
         <Grid item xs={12}>
-          <Button
-            variant="contained"
-            component="label"
-            startIcon={<PhotoCamera />}
-          >
+          <Button variant="contained" component="label" startIcon={<PhotoCamera />}>
             Upload Product Image
             <input
+              name="productImage"
               type="file"
+              capture="environment"
               hidden
-              onChange={(event) => formik.setFieldValue('productImage', event.currentTarget.files[0])}
+              accept="image/*"
+              onChange={(e) => {
+                handleImageChange(e, setFieldValue);
+              }}
             />
           </Button>
           {formik.values.productImage && (
@@ -103,26 +133,26 @@ const ProductDetail = ({ formik }) => {
             </FormHelperText>
           </FormControl>
         </Grid>
-          <Grid item xs={12}>
-            <FormControl variant="outlined" fullWidth size="small">
-              <InputLabel>Category</InputLabel>
-              <Select
-                name="category"
-                value={formik.values.category}
-                onChange={formik.handleChange}
-                error={Boolean(formik.touched.category && formik.errors.category)}
-              >
-                {categories.map((category) => (
-                  <MenuItem key={category} value={category}>
-                    {category}
-                  </MenuItem>
-                ))}
-              </Select>
-              <FormHelperText error={Boolean(formik.touched.category && formik.errors.category)}>
-                {formik.touched.category && formik.errors.category}
-              </FormHelperText>
-            </FormControl>
-          </Grid>
+        <Grid item xs={12}>
+          <FormControl variant="outlined" fullWidth size="small">
+            <InputLabel>Category</InputLabel>
+            <Select
+              name="category"
+              value={formik.values.category}
+              onChange={formik.handleChange}
+              error={Boolean(formik.touched.category && formik.errors.category)}
+            >
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
+            </Select>
+            <FormHelperText error={Boolean(formik.touched.category && formik.errors.category)}>
+              {formik.touched.category && formik.errors.category}
+            </FormHelperText>
+          </FormControl>
+        </Grid>
         <Grid item xs={12}>
           <TextField
             name="amount"
@@ -138,13 +168,7 @@ const ProductDetail = ({ formik }) => {
             disabled={isCustomAmount}
           />
           <FormControlLabel
-            control={
-              <Checkbox
-                checked={isCustomAmount}
-                onChange={handleFreeProductChange}
-                name="isCustomAmount"
-              />
-            }
+            control={<Checkbox checked={isCustomAmount} onChange={handleFreeProductChange} name="isCustomAmount" />}
             label="Enable Custom Amount"
           />
         </Grid>
@@ -168,23 +192,15 @@ const ProductDetail = ({ formik }) => {
           )}
         </Grid>
         <Grid item xs={12}>
-            <Button
-              variant="contained"
-              component="label"
-              startIcon={<UploadFile />}
-            >
-              Upload Product File
-              <input
-                type="file"
-                hidden
-                onChange={(event) => formik.setFieldValue('file', event.currentTarget.files[0])}
-              />
-            </Button>
-            {formik.values.file && (
-              <Typography variant="body2" component="p">
-                {formik.values.file.name}
-              </Typography>
-            )}
+          <Button variant="contained" component="label" startIcon={<UploadFile />}>
+            Upload Product File
+            <input type="file" hidden onChange={(event) => formik.setFieldValue('file', event.currentTarget.files[0])} />
+          </Button>
+          {formik.values.file && (
+            <Typography variant="body2" component="p">
+              {formik.values.file.name}
+            </Typography>
+          )}
         </Grid>
       </Grid>
     </form>
