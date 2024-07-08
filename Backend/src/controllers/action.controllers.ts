@@ -25,7 +25,7 @@ export default class ActionController {
         `${req.protocol}://${req.get('host')}${req.originalUrl}`
       ).toString();
 
-      const productName = req.originalUrl.split("/").pop();
+      const productName = req.params.name;
       const product = await getProductByQuery({
         name: productName
       });
@@ -76,7 +76,7 @@ export default class ActionController {
 
   async postAction(req: Request, res: Response) {
     try {
-      const productName = req.originalUrl.split("/").pop();
+      const productName = req.params.name;
       const product = await getProductByQuery({
         name: productName
       });
@@ -104,16 +104,8 @@ export default class ActionController {
       );
 
       let price: number;
-      console.log(product)
-      if (product?.payAnyPrice === true) {
-        // if (req) {
-          // price = parseFloat(String(req.query.amount));
-          price = parseFloat(req.originalUrl.split("=").pop()!);
-          price = 0.1;
-          console.log("Heree", price);
-        // } else {
-        //   throw new Error("Please provide an amount!")
-        // }
+      if (product?.payAnyPrice) {
+        price = parseFloat(String(req.query.amount));
         if (price <= 0) throw new Error("amount is too small");
       } else {
         price = product?.price!;
@@ -122,7 +114,7 @@ export default class ActionController {
       if (price * LAMPORTS_PER_SOL < minimumBalance) {
         throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
       }
-      console.log("Here1",price)
+      console.log("Here1", price)
 
       const sellerPubkey: PublicKey = new PublicKey(
         product?.userId as string
@@ -130,8 +122,8 @@ export default class ActionController {
 
       const transaction = new Transaction();
 
-      console.log("Here2",sellerPubkey)
-      console.log("Here3",DEFAULT_SOL_ADDRESS)
+      console.log("Here2", sellerPubkey)
+      console.log("Here3", DEFAULT_SOL_ADDRESS)
 
       // Transfer 90% of the funds to the seller's address
       transaction.add(
