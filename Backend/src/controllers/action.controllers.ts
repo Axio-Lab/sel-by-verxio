@@ -2,19 +2,15 @@ import { Request, Response } from "express";
 import ProductService from "../services/product.servicee";
 import { ACTIONS_CORS_HEADERS, ActionGetResponse, ActionPostRequest, ActionPostResponse } from "@solana/actions";
 import {
-  Authorized,
   clusterApiUrl,
   Connection,
-  Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
-  StakeProgram,
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
 
 const {
-  getProductById,
   getProductByQuery
 } = new ProductService();
 
@@ -27,8 +23,7 @@ export default class ActionController {
     try {
 
       const baseHref = new URL(
-        `/api/v1/action`,
-        `${req.protocol}://${req.get('host')}`
+        req.originalUrl
       ).toString();
 
       const productName = req.originalUrl.split("/").pop();
@@ -47,7 +42,7 @@ export default class ActionController {
             actions: [
               {
                 label: `Buy Now (${product?.price} SOL)`,
-                href: `${baseHref}&amount={amount}`,
+                href: `${baseHref}?amount={amount}`,
                 parameters: [
                   {
                     name: "amount",
@@ -87,8 +82,6 @@ export default class ActionController {
         name: productName
       });
 
-      const { toPubkey, sellerPubkey } = validatedQueryParams(req, product?.userId!);
-
       const body: ActionPostRequest = req.body;
 
       // validate the client provided input
@@ -111,9 +104,25 @@ export default class ActionController {
         0, // note: simple accounts that just store native SOL have `0` bytes of data
       );
 
-      if (product?.price! * LAMPORTS_PER_SOL < minimumBalance) {
-        throw `account may not be rent exempt: ${toPubkey.toBase58()}`;
+      let price: number;
+      if (product?.payAnyPrice) {
+        if (req.query.amount) {
+          price = parseFloat(req.query.amount as unknown as any);
+        } else {
+          throw "Please provide an amount!"
+        }
+        if (price <= 0) throw "amount is too small";
+      } else {
+        price = product?.price!;
       }
+
+      if (price * LAMPORTS_PER_SOL < minimumBalance) {
+        throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
+      }
+
+      const sellerPubkey: PublicKey = new PublicKey(
+        product?.userId as string
+      );
 
       const transaction = new Transaction();
 
@@ -122,7 +131,7 @@ export default class ActionController {
         SystemProgram.transfer({
           fromPubkey: account,
           toPubkey: sellerPubkey,
-          lamports: Math.floor(product?.price! * LAMPORTS_PER_SOL * 0.9),
+          lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.9),
         }),
       );
 
@@ -130,8 +139,8 @@ export default class ActionController {
       transaction.add(
         SystemProgram.transfer({
           fromPubkey: account,
-          toPubkey: toPubkey,
-          lamports: Math.floor(product?.price! * LAMPORTS_PER_SOL * 0.1),
+          toPubkey: DEFAULT_SOL_ADDRESS,
+          lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.1),
         }),
       );
 
@@ -148,7 +157,7 @@ export default class ActionController {
           requireAllSignatures: false,
           verifySignatures: true,
         }).toString('base64'),
-        message: `You've successfully purchased ${product?.name} for ${product?.price} SOL 🎊`,
+        message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
       };
 
       res.set(ACTIONS_CORS_HEADERS);
@@ -162,36 +171,4 @@ export default class ActionController {
         })
     }
   }
-}
-
-function validatedQueryParams(req: Request, sellerAddress: string) {
-  // const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-  //   sellerAddress as string
-  // );
-
-  let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
-  let sellerPubkey: PublicKey = new PublicKey(
-    sellerAddress as string
-  );;
-
-  try {
-    if (req.query.to) {
-      toPubkey = new PublicKey(req.query.to as string);
-    }
-  } catch (err) {
-    throw "Invalid input query parameter: to";
-  }
-
-  try {
-    if (req.query.seller) {
-      sellerPubkey = new PublicKey(req.query.seller as string);
-    }
-  } catch (err) {
-    throw "Invalid input query parameter: to";
-  }
-
-  return {
-    toPubkey,
-    sellerPubkey,
-  };
 }
