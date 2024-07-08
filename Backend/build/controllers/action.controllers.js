@@ -37,7 +37,7 @@ class ActionController {
                             actions: [
                                 {
                                     label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
-                                    href: `${baseHref}&amount={amount}`,
+                                    href: `${baseHref}?amount={amount}`,
                                     parameters: [
                                         {
                                             name: "amount",
@@ -93,9 +93,9 @@ class ActionController {
                 const minimumBalance = yield connection.getMinimumBalanceForRentExemption(0);
                 let price;
                 if (product === null || product === void 0 ? void 0 : product.payAnyPrice) {
-                    console.log(req.query.amount);
+                    console.log("Here", req.query.amount);
                     if (req.query.amount) {
-                        price = parseFloat(req.query.amount);
+                        price = parseFloat(String(req.query.amount));
                     }
                     else {
                         throw "Please provide an amount!";
@@ -109,8 +109,11 @@ class ActionController {
                 if (price * web3_js_1.LAMPORTS_PER_SOL < minimumBalance) {
                     throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
                 }
+                console.log("Here1", price);
                 const sellerPubkey = new web3_js_1.PublicKey(product === null || product === void 0 ? void 0 : product.userId);
                 const transaction = new web3_js_1.Transaction();
+                console.log("Here2", sellerPubkey);
+                console.log("Here3", DEFAULT_SOL_ADDRESS);
                 // Transfer 90% of the funds to the seller's address
                 transaction.add(web3_js_1.SystemProgram.transfer({
                     fromPubkey: account,
