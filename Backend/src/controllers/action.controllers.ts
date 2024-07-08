@@ -15,7 +15,7 @@ const {
 } = new ProductService();
 
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-  "F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9", // SEL wallet
+  "F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9"
 );
 
 export default class ActionController {
@@ -41,7 +41,7 @@ export default class ActionController {
             actions: [
               {
                 label: `Buy Now (${product?.price} SOL)`,
-                href: `${baseHref}?amount={amount}`,
+                href: `${baseHref}&amount={amount}`,
                 parameters: [
                   {
                     name: "amount",
@@ -105,6 +105,7 @@ export default class ActionController {
 
       let price: number;
       if (product?.payAnyPrice) {
+        console.log(req.query.amount)
         if (req.query.amount) {
           price = parseFloat(req.query.amount as unknown as any);
         } else {

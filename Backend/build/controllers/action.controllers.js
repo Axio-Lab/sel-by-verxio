@@ -37,7 +37,7 @@ class ActionController {
                             actions: [
                                 {
                                     label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
-                                    href: `${baseHref}?amount={amount}`,
+                                    href: `${baseHref}&amount={amount}`,
                                     parameters: [
                                         {
                                             name: "amount",
@@ -93,6 +93,7 @@ class ActionController {
                 const minimumBalance = yield connection.getMinimumBalanceForRentExemption(0);
                 let price;
                 if (product === null || product === void 0 ? void 0 : product.payAnyPrice) {
+                    console.log(req.query.amount);
                     if (req.query.amount) {
                         price = parseFloat(req.query.amount);
                     }
