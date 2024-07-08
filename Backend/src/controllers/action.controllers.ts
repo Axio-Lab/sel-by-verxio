@@ -114,16 +114,12 @@ export default class ActionController {
       if (price * LAMPORTS_PER_SOL < minimumBalance) {
         throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
       }
-      console.log("Here1", price)
 
       const sellerPubkey: PublicKey = new PublicKey(
         product?.userId as string
       );
 
       const transaction = new Transaction();
-
-      console.log("Here2", sellerPubkey)
-      console.log("Here3", DEFAULT_SOL_ADDRESS)
 
       // Transfer 90% of the funds to the seller's address
       transaction.add(
@@ -158,6 +154,14 @@ export default class ActionController {
         }).toString('base64'),
         message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
       };
+
+      if (product) {
+        product.quantity = product?.quantity - 1;
+        product.sales = product?.sales + 1;
+        product.revenue = product?.revenue + price;
+
+        await product.save();
+      }
 
       res.set(ACTIONS_CORS_HEADERS);
       return res.json(payload);
