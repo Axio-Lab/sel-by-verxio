@@ -103,11 +103,8 @@ class ActionController {
                 if (price * web3_js_1.LAMPORTS_PER_SOL < minimumBalance) {
                     throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
                 }
-                console.log("Here1", price);
                 const sellerPubkey = new web3_js_1.PublicKey(product === null || product === void 0 ? void 0 : product.userId);
                 const transaction = new web3_js_1.Transaction();
-                console.log("Here2", sellerPubkey);
-                console.log("Here3", DEFAULT_SOL_ADDRESS);
                 // Transfer 90% of the funds to the seller's address
                 transaction.add(web3_js_1.SystemProgram.transfer({
                     fromPubkey: account,
@@ -130,6 +127,12 @@ class ActionController {
                     }).toString('base64'),
                     message: `You've successfully purchased ${product === null || product === void 0 ? void 0 : product.name} for ${price} SOL 🎊`,
                 };
+                if (product) {
+                    product.quantity = (product === null || product === void 0 ? void 0 : product.quantity) - 1;
+                    product.sales = (product === null || product === void 0 ? void 0 : product.sales) + 1;
+                    product.revenue = (product === null || product === void 0 ? void 0 : product.revenue) + price;
+                    yield product.save();
+                }
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
                 return res.json(payload);
             }
