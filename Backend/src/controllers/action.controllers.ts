@@ -110,7 +110,6 @@ export default class ActionController {
       } else {
         price = product?.price!;
       }
-      console.log(price)
 
       if (price * LAMPORTS_PER_SOL < minimumBalance) {
         throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
