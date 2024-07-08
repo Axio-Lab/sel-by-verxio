@@ -41,7 +41,7 @@ export default class ActionController {
             actions: [
               {
                 label: `Buy Now (${product?.price} SOL)`,
-                href: `${baseHref}&amount={amount}`,
+                href: `${baseHref}?amount={amount}`,
                 parameters: [
                   {
                     name: "amount",
@@ -105,9 +105,9 @@ export default class ActionController {
 
       let price: number;
       if (product?.payAnyPrice) {
-        console.log(req.query.amount)
+        console.log("Here",req.query.amount)
         if (req.query.amount) {
-          price = parseFloat(req.query.amount as unknown as any);
+          price = parseFloat(String(req.query.amount));
         } else {
           throw "Please provide an amount!"
         }
@@ -119,12 +119,16 @@ export default class ActionController {
       if (price * LAMPORTS_PER_SOL < minimumBalance) {
         throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
       }
+      console.log("Here1",price)
 
       const sellerPubkey: PublicKey = new PublicKey(
         product?.userId as string
       );
 
       const transaction = new Transaction();
+
+      console.log("Here2",sellerPubkey)
+      console.log("Here3",DEFAULT_SOL_ADDRESS)
 
       // Transfer 90% of the funds to the seller's address
       transaction.add(
