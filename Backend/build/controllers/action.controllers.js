@@ -100,7 +100,6 @@ class ActionController {
                 else {
                     price = product === null || product === void 0 ? void 0 : product.price;
                 }
-                console.log(price);
                 if (price * web3_js_1.LAMPORTS_PER_SOL < minimumBalance) {
                     throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
                 }
