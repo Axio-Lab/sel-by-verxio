@@ -15,13 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const product_servicee_1 = __importDefault(require("../services/product.servicee"));
 const actions_1 = require("@solana/actions");
 const web3_js_1 = require("@solana/web3.js");
-const { getProductById, getProductByQuery } = new product_servicee_1.default();
+const { getProductByQuery } = new product_servicee_1.default();
 const DEFAULT_SOL_ADDRESS = new web3_js_1.PublicKey("F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9");
 class ActionController {
     getAction(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const baseHref = new URL(`/api/v1/action`, `${req.protocol}://${req.get('host')}`).toString();
+                const baseHref = new URL(req.originalUrl).toString();
                 const productName = req.originalUrl.split("/").pop();
                 const product = yield getProductByQuery({
                     name: productName
@@ -37,7 +37,7 @@ class ActionController {
                             actions: [
                                 {
                                     label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
-                                    href: `${baseHref}&amount={amount}`,
+                                    href: `${baseHref}?amount={amount}`,
                                     parameters: [
                                         {
                                             name: "amount",
@@ -76,7 +76,6 @@ class ActionController {
                 const product = yield getProductByQuery({
                     name: productName
                 });
-                const { toPubkey, sellerPubkey } = validatedQueryParams(req, product === null || product === void 0 ? void 0 : product.userId);
                 const body = req.body;
                 // validate the client provided input
                 let account;
@@ -92,21 +91,36 @@ class ActionController {
                 const connection = new web3_js_1.Connection(process.env.SOLANA_RPC || (0, web3_js_1.clusterApiUrl)("devnet"));
                 // ensure the receiving account will be rent exempt
                 const minimumBalance = yield connection.getMinimumBalanceForRentExemption(0);
-                if ((product === null || product === void 0 ? void 0 : product.price) * web3_js_1.LAMPORTS_PER_SOL < minimumBalance) {
-                    throw `account may not be rent exempt: ${toPubkey.toBase58()}`;
+                let price;
+                if (product === null || product === void 0 ? void 0 : product.payAnyPrice) {
+                    if (req.query.amount) {
+                        price = parseFloat(req.query.amount);
+                    }
+                    else {
+                        throw "Please provide an amount!";
+                    }
+                    if (price <= 0)
+                        throw "amount is too small";
                 }
+                else {
+                    price = product === null || product === void 0 ? void 0 : product.price;
+                }
+                if (price * web3_js_1.LAMPORTS_PER_SOL < minimumBalance) {
+                    throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
+                }
+                const sellerPubkey = new web3_js_1.PublicKey(product === null || product === void 0 ? void 0 : product.userId);
                 const transaction = new web3_js_1.Transaction();
                 // Transfer 90% of the funds to the seller's address
                 transaction.add(web3_js_1.SystemProgram.transfer({
                     fromPubkey: account,
                     toPubkey: sellerPubkey,
-                    lamports: Math.floor((product === null || product === void 0 ? void 0 : product.price) * web3_js_1.LAMPORTS_PER_SOL * 0.9),
+                    lamports: Math.floor(price * web3_js_1.LAMPORTS_PER_SOL * 0.9),
                 }));
                 // Transfer 10% of the funds to the default SOL address
                 transaction.add(web3_js_1.SystemProgram.transfer({
                     fromPubkey: account,
-                    toPubkey: toPubkey,
-                    lamports: Math.floor((product === null || product === void 0 ? void 0 : product.price) * web3_js_1.LAMPORTS_PER_SOL * 0.1),
+                    toPubkey: DEFAULT_SOL_ADDRESS,
+                    lamports: Math.floor(price * web3_js_1.LAMPORTS_PER_SOL * 0.1),
                 }));
                 // set the end user as the fee payer
                 transaction.feePayer = account;
@@ -116,7 +130,7 @@ class ActionController {
                         requireAllSignatures: false,
                         verifySignatures: true,
                     }).toString('base64'),
-                    message: `You've successfully purchased ${product === null || product === void 0 ? void 0 : product.name} for ${product === null || product === void 0 ? void 0 : product.price} SOL 🎊`,
+                    message: `You've successfully purchased ${product === null || product === void 0 ? void 0 : product.name} for ${price} SOL 🎊`,
                 };
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
                 return res.json(payload);
@@ -132,31 +146,3 @@ class ActionController {
     }
 }
 exports.default = ActionController;
-function validatedQueryParams(req, sellerAddress) {
-    // const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-    //   sellerAddress as string
-    // );
-    let toPubkey = DEFAULT_SOL_ADDRESS;
-    let sellerPubkey = new web3_js_1.PublicKey(sellerAddress);
-    ;
-    try {
-        if (req.query.to) {
-            toPubkey = new web3_js_1.PublicKey(req.query.to);
-        }
-    }
-    catch (err) {
-        throw "Invalid input query parameter: to";
-    }
-    try {
-        if (req.query.seller) {
-            sellerPubkey = new web3_js_1.PublicKey(req.query.seller);
-        }
-    }
-    catch (err) {
-        throw "Invalid input query parameter: to";
-    }
-    return {
-        toPubkey,
-        sellerPubkey,
-    };
-}
