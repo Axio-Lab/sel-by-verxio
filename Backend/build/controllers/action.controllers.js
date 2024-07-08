@@ -21,7 +21,7 @@ class ActionController {
     getAction(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const baseHref = new URL(req.originalUrl).toString();
+                const baseHref = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`).toString();
                 const productName = req.originalUrl.split("/").pop();
                 const product = yield getProductByQuery({
                     name: productName

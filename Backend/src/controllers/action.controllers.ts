@@ -21,9 +21,8 @@ const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
 export default class ActionController {
   async getAction(req: Request, res: Response) {
     try {
-
       const baseHref = new URL(
-        req.originalUrl
+        `${req.protocol}://${req.get('host')}${req.originalUrl}`
       ).toString();
 
       const productName = req.originalUrl.split("/").pop();
