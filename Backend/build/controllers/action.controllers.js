@@ -32,11 +32,11 @@ class ActionController {
                         title: `${product === null || product === void 0 ? void 0 : product.name}`,
                         icon: product === null || product === void 0 ? void 0 : product.image,
                         description: `${product === null || product === void 0 ? void 0 : product.description}`,
-                        label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
+                        label: `Buy Now`,
                         links: {
                             actions: [
                                 {
-                                    label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
+                                    label: `Buy Now`,
                                     href: `${baseHref}?amount={amount}`,
                                     parameters: [
                                         {
@@ -93,13 +93,14 @@ class ActionController {
                 const minimumBalance = yield connection.getMinimumBalanceForRentExemption(0);
                 let price;
                 if (product === null || product === void 0 ? void 0 : product.payAnyPrice) {
-                    price = parseFloat(String(req.query.amount));
+                    price = parseFloat(req.query.amount);
                     if (price <= 0)
                         throw new Error("amount is too small");
                 }
                 else {
                     price = product === null || product === void 0 ? void 0 : product.price;
                 }
+                console.log(price);
                 if (price * web3_js_1.LAMPORTS_PER_SOL < minimumBalance) {
                     throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
                 }

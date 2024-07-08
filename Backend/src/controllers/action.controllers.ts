@@ -36,11 +36,11 @@ export default class ActionController {
           title: `${product?.name}`,
           icon: product?.image as unknown as string,
           description: `${product?.description}`,
-          label: `Buy Now (${product?.price} SOL)`,
+          label: `Buy Now`,
           links: {
             actions: [
               {
-                label: `Buy Now (${product?.price} SOL)`,
+                label: `Buy Now`,
                 href: `${baseHref}?amount={amount}`,
                 parameters: [
                   {
@@ -103,13 +103,14 @@ export default class ActionController {
         0, // note: simple accounts that just store native SOL have `0` bytes of data
       );
 
-      let price: number;
+      let price;
       if (product?.payAnyPrice) {
-        price = parseFloat(String(req.query.amount));
+        price = parseFloat(req.query.amount as any);
         if (price <= 0) throw new Error("amount is too small");
       } else {
         price = product?.price!;
       }
+      console.log(price)
 
       if (price * LAMPORTS_PER_SOL < minimumBalance) {
         throw `account may not be rent exempt: ${DEFAULT_SOL_ADDRESS.toBase58()}`;
