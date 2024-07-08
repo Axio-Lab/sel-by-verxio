@@ -92,16 +92,16 @@ class ActionController {
                 // ensure the receiving account will be rent exempt
                 const minimumBalance = yield connection.getMinimumBalanceForRentExemption(0);
                 let price;
-                if (product === null || product === void 0 ? void 0 : product.payAnyPrice) {
-                    console.log("Here");
-                    if (req) {
-                        // price = parseFloat(String(req.query.amount));
-                        price = parseFloat(req.originalUrl.split("=").pop());
-                        console.log("Heree");
-                    }
-                    else {
-                        throw new Error("Please provide an amount!");
-                    }
+                console.log(product);
+                if ((product === null || product === void 0 ? void 0 : product.payAnyPrice) === true) {
+                    // if (req) {
+                    // price = parseFloat(String(req.query.amount));
+                    price = parseFloat(req.originalUrl.split("=").pop());
+                    price = 0.1;
+                    console.log("Heree", price);
+                    // } else {
+                    //   throw new Error("Please provide an amount!")
+                    // }
                     if (price <= 0)
                         throw new Error("amount is too small");
                 }
