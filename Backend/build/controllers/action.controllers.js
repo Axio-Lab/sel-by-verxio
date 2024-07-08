@@ -133,6 +133,12 @@ class ActionController {
                     }).toString('base64'),
                     message: `You've successfully purchased ${product === null || product === void 0 ? void 0 : product.name} for ${price} SOL 🎊`,
                 };
+                if (product) {
+                    product.quantity = (product === null || product === void 0 ? void 0 : product.quantity) - 1;
+                    product.sales = (product === null || product === void 0 ? void 0 : product.sales) + 1;
+                    product.revenue = (product === null || product === void 0 ? void 0 : product.revenue) + price;
+                    yield product.save();
+                }
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
                 res.status(200).json(payload);
                 // Here is the new part where we wait for the transaction to be confirmed
@@ -144,14 +150,7 @@ class ActionController {
                 if (signature) {
                     console.log("Transaction successful!");
                     // Add your database update logic here
-                    if (product) {
-                        product.quantity = (product === null || product === void 0 ? void 0 : product.quantity) - 1;
-                        product.sales = (product === null || product === void 0 ? void 0 : product.sales) + 1;
-                        product.revenue = (product === null || product === void 0 ? void 0 : product.revenue) + price;
-                        yield product.save();
-                    }
                 }
-                return;
             }
             catch (error) {
                 return res.status(500).send({
