@@ -7,10 +7,10 @@ const {
 } = new ActionController();
 
 //get action
-router.get("/:id", getAction);
-router.options("/:id", getAction);
+router.get("/:name", getAction);
+router.options("/:name", getAction);
 
 //post action
-router.post("/:id", postAction);
+router.post("/:name", postAction);
 
 export default router;

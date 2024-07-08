@@ -22,7 +22,7 @@ class ActionController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const baseHref = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`).toString();
-                const productName = req.originalUrl.split("/").pop();
+                const productName = req.params.name;
                 const product = yield getProductByQuery({
                     name: productName
                 });
@@ -72,7 +72,7 @@ class ActionController {
     postAction(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const productName = req.originalUrl.split("/").pop();
+                const productName = req.params.name;
                 const product = yield getProductByQuery({
                     name: productName
                 });
@@ -92,16 +92,8 @@ class ActionController {
                 // ensure the receiving account will be rent exempt
                 const minimumBalance = yield connection.getMinimumBalanceForRentExemption(0);
                 let price;
-                console.log(product);
-                if ((product === null || product === void 0 ? void 0 : product.payAnyPrice) === true) {
-                    // if (req) {
-                    // price = parseFloat(String(req.query.amount));
-                    price = parseFloat(req.originalUrl.split("=").pop());
-                    price = 0.1;
-                    console.log("Heree", price);
-                    // } else {
-                    //   throw new Error("Please provide an amount!")
-                    // }
+                if (product === null || product === void 0 ? void 0 : product.payAnyPrice) {
+                    price = parseFloat(String(req.query.amount));
                     if (price <= 0)
                         throw new Error("amount is too small");
                 }
