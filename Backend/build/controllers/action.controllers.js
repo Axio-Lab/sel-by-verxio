@@ -15,20 +15,48 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const product_servicee_1 = __importDefault(require("../services/product.servicee"));
 const actions_1 = require("@solana/actions");
 const web3_js_1 = require("@solana/web3.js");
-const { getProductById } = new product_servicee_1.default();
+const { getProductById, getProductByQuery } = new product_servicee_1.default();
 const DEFAULT_SOL_ADDRESS = new web3_js_1.PublicKey("F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9");
 class ActionController {
     getAction(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const productId = req.originalUrl.split("/").pop();
-                const product = yield getProductById(productId);
-                const payload = {
-                    icon: product === null || product === void 0 ? void 0 : product.image,
-                    label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
-                    description: `${product === null || product === void 0 ? void 0 : product.description}`,
-                    title: `${product === null || product === void 0 ? void 0 : product.name}`,
-                };
+                const baseHref = new URL(`/api/v1/action`, `${req.protocol}://${req.get('host')}`).toString();
+                const productName = req.originalUrl.split("/").pop();
+                const product = yield getProductByQuery({
+                    name: productName
+                });
+                let payload;
+                if (product === null || product === void 0 ? void 0 : product.payAnyPrice) {
+                    payload = {
+                        title: `${product === null || product === void 0 ? void 0 : product.name}`,
+                        icon: product === null || product === void 0 ? void 0 : product.image,
+                        description: `${product === null || product === void 0 ? void 0 : product.description}`,
+                        label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
+                        links: {
+                            actions: [
+                                {
+                                    label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
+                                    href: `${baseHref}&amount={amount}`,
+                                    parameters: [
+                                        {
+                                            name: "amount",
+                                            label: "Enter a custom USD amount"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    };
+                }
+                else {
+                    payload = {
+                        icon: product === null || product === void 0 ? void 0 : product.image,
+                        label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
+                        description: `${product === null || product === void 0 ? void 0 : product.description}`,
+                        title: `${product === null || product === void 0 ? void 0 : product.name}`
+                    };
+                }
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
                 return res.json(payload);
             }
@@ -44,8 +72,10 @@ class ActionController {
     postAction(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const productId = req.originalUrl.split("/").pop();
-                const product = yield getProductById(productId);
+                const productName = req.originalUrl.split("/").pop();
+                const product = yield getProductByQuery({
+                    name: productName
+                });
                 const { toPubkey, sellerPubkey } = validatedQueryParams(req, product === null || product === void 0 ? void 0 : product.userId);
                 const body = req.body;
                 // validate the client provided input
@@ -88,8 +118,6 @@ class ActionController {
                     }).toString('base64'),
                     message: `You've successfully purchased ${product === null || product === void 0 ? void 0 : product.name} for ${product === null || product === void 0 ? void 0 : product.price} SOL 🎊`,
                 };
-                console.log("Transaction: ", transaction);
-                console.log("Payload: ", payload);
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
                 return res.json(payload);
             }

@@ -14,7 +14,8 @@ import {
 } from "@solana/web3.js";
 
 const {
-  getProductById
+  getProductById,
+  getProductByQuery
 } = new ProductService();
 
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
@@ -24,19 +25,51 @@ const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
 export default class ActionController {
   async getAction(req: Request, res: Response) {
     try {
-      const productId = req.originalUrl.split("/").pop();
-      const product = await getProductById(productId as unknown as string);
 
-      const payload: ActionGetResponse = {
-        icon: product?.image as unknown as string,
-        label: `Buy Now (${product?.price} SOL)`,
-        description: `${product?.description}`,
-        title: `${product?.name}`,
+      const baseHref = new URL(
+        `/api/v1/action`,
+        `${req.protocol}://${req.get('host')}`
+      ).toString();
+
+      const productName = req.originalUrl.split("/").pop();
+      const product = await getProductByQuery({
+        name: productName
+      });
+
+      let payload: ActionGetResponse;
+      if (product?.payAnyPrice) {
+        payload = {
+          title: `${product?.name}`,
+          icon: product?.image as unknown as string,
+          description: `${product?.description}`,
+          label: `Buy Now (${product?.price} SOL)`,
+          links: {
+            actions: [
+              {
+                label: `Buy Now (${product?.price} SOL)`,
+                href: `${baseHref}&amount={amount}`,
+                parameters: [
+                  {
+                    name: "amount",
+                    label: "Enter a custom USD amount"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      } else {
+        payload = {
+          icon: product?.image as unknown as string,
+          label: `Buy Now (${product?.price} SOL)`,
+          description: `${product?.description}`,
+          title: `${product?.name}`
+        }
       }
 
       res.set(ACTIONS_CORS_HEADERS);
 
-      return res.json(payload)
+      return res.json(payload);
 
     } catch (error: any) {
       return res.status(500)
@@ -49,8 +82,10 @@ export default class ActionController {
 
   async postAction(req: Request, res: Response) {
     try {
-      const productId = req.originalUrl.split("/").pop();
-      const product = await getProductById(productId as unknown as string);
+      const productName = req.originalUrl.split("/").pop();
+      const product = await getProductByQuery({
+        name: productName
+      });
 
       const { toPubkey, sellerPubkey } = validatedQueryParams(req, product?.userId!);
 
@@ -115,8 +150,6 @@ export default class ActionController {
         }).toString('base64'),
         message: `You've successfully purchased ${product?.name} for ${product?.price} SOL 🎊`,
       };
-      console.log("Transaction: ",transaction)
-      console.log("Payload: ",payload)
 
       res.set(ACTIONS_CORS_HEADERS);
       return res.json(payload);
@@ -140,7 +173,7 @@ function validatedQueryParams(req: Request, sellerAddress: string) {
   let sellerPubkey: PublicKey = new PublicKey(
     sellerAddress as string
   );;
- 
+
   try {
     if (req.query.to) {
       toPubkey = new PublicKey(req.query.to as string);
