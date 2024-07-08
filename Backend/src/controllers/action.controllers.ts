@@ -105,10 +105,11 @@ export default class ActionController {
 
       let price: number;
       if (product?.payAnyPrice) {
-        console.log("Here",req.query)
+        console.log("Here")
         if (req) {
           // price = parseFloat(String(req.query.amount));
           price = parseFloat(req.originalUrl.split("=").pop()!);
+          console.log("Heree");
         } else {
           throw new Error("Please provide an amount!")
         }
