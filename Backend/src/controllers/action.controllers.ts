@@ -105,13 +105,14 @@ export default class ActionController {
 
       let price: number;
       if (product?.payAnyPrice) {
-        console.log("Here",req.query.amount)
-        if (req.query.amount) {
-          price = parseFloat(String(req.query.amount));
+        console.log("Here",req.query)
+        if (req) {
+          // price = parseFloat(String(req.query.amount));
+          price = parseFloat(req.originalUrl.split("=").pop()!);
         } else {
-          throw "Please provide an amount!"
+          throw new Error("Please provide an amount!")
         }
-        if (price <= 0) throw "amount is too small";
+        if (price <= 0) throw new Error("amount is too small");
       } else {
         price = product?.price!;
       }
