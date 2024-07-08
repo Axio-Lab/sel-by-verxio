@@ -18,6 +18,11 @@ export default class ProductService {
         return product;
     }
 
+    async getProductByQuery(query: Partial<IProduct>) {
+        const product = await Product.findOne(query);
+        return product;
+    }
+
     async getProducts(query: Partial<IProduct>) {
         const products = await Product.find(query, "name type product sales revenue");
         return products;

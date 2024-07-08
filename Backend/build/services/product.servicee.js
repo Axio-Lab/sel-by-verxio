@@ -34,6 +34,12 @@ class ProductService {
             return product;
         });
     }
+    getProductByQuery(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const product = yield product_model_1.default.findOne(query);
+            return product;
+        });
+    }
     getProducts(query) {
         return __awaiter(this, void 0, void 0, function* () {
             const products = yield product_model_1.default.find(query, "name type product sales revenue");
