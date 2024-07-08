@@ -159,20 +159,12 @@ export default class ActionController {
         message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
       };
 
-      if (product) {
-        product.quantity = product?.quantity - 1;
-        product.sales = product?.sales + 1;
-        product.revenue = product?.revenue + price;
-
-        await product.save();
-      }
-
       res.set(ACTIONS_CORS_HEADERS);
       res.status(200).json(payload);
 
       // Here is the new part where we wait for the transaction to be confirmed
       const signedTransaction = Transaction.from(Buffer.from(serializedTransaction, 'base64'));
-      
+
       // Sending and confirming the transaction
       const signature = await sendAndConfirmTransaction(connection, signedTransaction, []);
 
@@ -181,8 +173,18 @@ export default class ActionController {
       // If transaction is confirmed, log success and update database
       if (signature) {
         console.log("Transaction successful!");
+
         // Add your database update logic here
+        if (product) {
+          product.quantity = product?.quantity - 1;
+          product.sales = product?.sales + 1;
+          product.revenue = product?.revenue + price;
+
+          await product.save();
+        }
       }
+
+      return;
 
     } catch (error: any) {
       return res.status(500).send({

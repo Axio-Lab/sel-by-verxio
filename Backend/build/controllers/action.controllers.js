@@ -77,7 +77,7 @@ class ActionController {
                     name: productName
                 });
                 const body = req.body;
-                // validate the client provided input
+                // Validate the client-provided input
                 let account;
                 try {
                     account = new web3_js_1.PublicKey(body.account);
@@ -89,8 +89,9 @@ class ActionController {
                     });
                 }
                 const connection = new web3_js_1.Connection(process.env.SOLANA_RPC || (0, web3_js_1.clusterApiUrl)("devnet"));
-                // ensure the receiving account will be rent exempt
-                const minimumBalance = yield connection.getMinimumBalanceForRentExemption(0);
+                // Ensure the receiving account will be rent exempt
+                const minimumBalance = yield connection.getMinimumBalanceForRentExemption(0 // Note: simple accounts that just store native SOL have `0` bytes of data
+                );
                 let price;
                 if (product === null || product === void 0 ? void 0 : product.payAnyPrice) {
                     price = parseFloat(req.query.amount);
@@ -117,9 +118,14 @@ class ActionController {
                     toPubkey: DEFAULT_SOL_ADDRESS,
                     lamports: Math.floor(price * web3_js_1.LAMPORTS_PER_SOL * 0.1),
                 }));
-                // set the end user as the fee payer
+                // Set the end user as the fee payer
                 transaction.feePayer = account;
                 transaction.recentBlockhash = (yield connection.getLatestBlockhash()).blockhash;
+                // Serialize the transaction for the client to sign
+                const serializedTransaction = transaction.serialize({
+                    requireAllSignatures: false,
+                    verifySignatures: true,
+                }).toString('base64');
                 const payload = {
                     transaction: transaction.serialize({
                         requireAllSignatures: false,
@@ -127,20 +133,30 @@ class ActionController {
                     }).toString('base64'),
                     message: `You've successfully purchased ${product === null || product === void 0 ? void 0 : product.name} for ${price} SOL 🎊`,
                 };
-                if (product) {
-                    product.quantity = (product === null || product === void 0 ? void 0 : product.quantity) - 1;
-                    product.sales = (product === null || product === void 0 ? void 0 : product.sales) + 1;
-                    product.revenue = (product === null || product === void 0 ? void 0 : product.revenue) + price;
-                    yield product.save();
-                }
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
-                return res.json(payload);
+                res.status(200).json(payload);
+                // Here is the new part where we wait for the transaction to be confirmed
+                const signedTransaction = web3_js_1.Transaction.from(Buffer.from(serializedTransaction, 'base64'));
+                // Sending and confirming the transaction
+                const signature = yield (0, web3_js_1.sendAndConfirmTransaction)(connection, signedTransaction, []);
+                console.log("Transaction Signature: ", signature);
+                // If transaction is confirmed, log success and update database
+                if (signature) {
+                    console.log("Transaction successful!");
+                    // Add your database update logic here
+                    if (product) {
+                        product.quantity = (product === null || product === void 0 ? void 0 : product.quantity) - 1;
+                        product.sales = (product === null || product === void 0 ? void 0 : product.sales) + 1;
+                        product.revenue = (product === null || product === void 0 ? void 0 : product.revenue) + price;
+                        yield product.save();
+                    }
+                }
+                return;
             }
             catch (error) {
-                return res.status(500)
-                    .send({
+                return res.status(500).send({
                     success: false,
-                    message: `Error: ${error.message}`
+                    message: `Error: ${error.message}`,
                 });
             }
         });
