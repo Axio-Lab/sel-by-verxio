@@ -9,6 +9,7 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   StakeProgram,
+  sendAndConfirmTransaction,
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
@@ -56,7 +57,7 @@ export default class ActionController {
 
       const body: ActionPostRequest = req.body;
 
-      // validate the client provided input
+      // Validate the client-provided input
       let account: PublicKey;
       try {
         account = new PublicKey(body.account);
@@ -68,16 +69,16 @@ export default class ActionController {
       }
 
       const connection = new Connection(
-        process.env.SOLANA_RPC! || clusterApiUrl("devnet"),
+        process.env.SOLANA_RPC! || clusterApiUrl("devnet")
       );
 
-      // ensure the receiving account will be rent exempt
+      // Ensure the receiving account will be rent exempt
       const minimumBalance = await connection.getMinimumBalanceForRentExemption(
-        0, // note: simple accounts that just store native SOL have `0` bytes of data
+        0 // Note: simple accounts that just store native SOL have `0` bytes of data
       );
 
       if (product?.price! * LAMPORTS_PER_SOL < minimumBalance) {
-        throw `account may not be rent exempt: ${toPubkey.toBase58()}`;
+        throw `Account may not be rent exempt: ${toPubkey.toBase58()}`;
       }
 
       const transaction = new Transaction();
@@ -88,7 +89,7 @@ export default class ActionController {
           fromPubkey: account,
           toPubkey: sellerPubkey,
           lamports: Math.floor(product?.price! * LAMPORTS_PER_SOL * 0.9),
-        }),
+        })
       );
 
       // Transfer 10% of the funds to the default SOL address
@@ -97,45 +98,55 @@ export default class ActionController {
           fromPubkey: account,
           toPubkey: toPubkey,
           lamports: Math.floor(product?.price! * LAMPORTS_PER_SOL * 0.1),
-        }),
+        })
       );
 
-      // set the end user as the fee payer
+      // Set the end user as the fee payer
       transaction.feePayer = account;
 
-      transaction.recentBlockhash = (
-        await connection.getLatestBlockhash()
-      ).blockhash;
+      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
+      // Serialize the transaction for the client to sign
+      const serializedTransaction = transaction.serialize({
+        requireAllSignatures: false,
+        verifySignatures: true,
+      }).toString('base64');
 
       const payload: ActionPostResponse = {
-        transaction: transaction.serialize({
-          requireAllSignatures: false,
-          verifySignatures: true,
-        }).toString('base64'),
+        transaction: serializedTransaction,
         message: `You've successfully purchased ${product?.name} for ${product?.price} SOL 🎊`,
       };
-      console.log("Transaction: ",transaction)
-      console.log("Payload: ",payload)
+
+      console.log("Transaction: ", transaction);
+      console.log("Payload: ", payload);
 
       res.set(ACTIONS_CORS_HEADERS);
-      return res.json(payload);
+      res.status(200).json(payload);
+
+      // Here is the new part where we wait for the transaction to be confirmed
+      const signedTransaction = Transaction.from(Buffer.from(serializedTransaction, 'base64'));
+      
+      // Sending and confirming the transaction
+      const signature = await sendAndConfirmTransaction(connection, signedTransaction, []);
+
+      console.log("Transaction Signature: ", signature);
+
+      // If transaction is confirmed, log success and update database
+      if (signature) {
+        console.log("Transaction successful!");
+        // Add your database update logic here
+      }
 
     } catch (error: any) {
-      return res.status(500)
-        .send({
-          success: false,
-          message: `Error: ${error.message}`
-        })
+      return res.status(500).send({
+        success: false,
+        message: `Error: ${error.message}`,
+      });
     }
   }
 }
 
 function validatedQueryParams(req: Request, sellerAddress: string) {
-  // const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
-  //   sellerAddress as string
-  // );
-
   let toPubkey: PublicKey = DEFAULT_SOL_ADDRESS;
   let sellerPubkey: PublicKey = new PublicKey(
     sellerAddress as string
