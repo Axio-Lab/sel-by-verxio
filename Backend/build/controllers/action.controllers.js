@@ -93,15 +93,16 @@ class ActionController {
                 const minimumBalance = yield connection.getMinimumBalanceForRentExemption(0);
                 let price;
                 if (product === null || product === void 0 ? void 0 : product.payAnyPrice) {
-                    console.log("Here", req.query.amount);
-                    if (req.query.amount) {
-                        price = parseFloat(String(req.query.amount));
+                    console.log("Here", req.query);
+                    if (req) {
+                        // price = parseFloat(String(req.query.amount));
+                        price = parseFloat(req.originalUrl.split("=").pop());
                     }
                     else {
-                        throw "Please provide an amount!";
+                        throw new Error("Please provide an amount!");
                     }
                     if (price <= 0)
-                        throw "amount is too small";
+                        throw new Error("amount is too small");
                 }
                 else {
                     price = product === null || product === void 0 ? void 0 : product.price;
