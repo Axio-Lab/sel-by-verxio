@@ -167,9 +167,7 @@ export default class ActionController {
         }).toString('base64'),
         message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
       };
-      
-      res.set(ACTIONS_CORS_HEADERS);
-      res.status(200).json(payload);
+
       // Here is the new part where we wait for the transaction to be confirmed
       const signedTransaction = Transaction.from(Buffer.from(payload.transaction, 'base64'));
 
@@ -194,6 +192,9 @@ export default class ActionController {
           price: product.price
         })
       }
+
+      res.set(ACTIONS_CORS_HEADERS);
+      return res.status(200).json(payload);
 
     } catch (error: any) {
       return res.status(500).send({
