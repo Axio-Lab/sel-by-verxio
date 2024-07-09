@@ -168,31 +168,6 @@ export default class ActionController {
         message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
       };
 
-      // Here is the new part where we wait for the transaction to be confirmed
-      const signedTransaction = Transaction.from(Buffer.from(payload.transaction, 'base64'));
-
-      // Sending and confirming the transaction
-      const signature = await sendAndConfirmTransaction(connection, signedTransaction, []);
-
-      console.log("Transaction Signature: ", signature);
-
-      // If transaction is confirmed, log success and update database
-      if (signature) {
-        console.log("Transaction successful!");
-
-        product.quantity = product?.quantity - 1;
-        product.sales = product?.sales + 1;
-        product.revenue = product?.revenue + price;
-
-        await product.save();
-
-        await create({
-          buyerId: body.account,
-          productId: product._id,
-          price: product.price
-        })
-      }
-
       res.set(ACTIONS_CORS_HEADERS);
       return res.status(200).json(payload);
 
@@ -203,4 +178,71 @@ export default class ActionController {
       });
     }
   }
+
+  async updateAfterTransaction(req: Request, res: Response) {
+    try {
+      const { productName, transactionSignature } = req.body;
+  
+      const product = await getProductByQuery({
+        name: productName
+      });
+  
+      if (!product) {
+        return res.status(404).json("Invalid product name");
+      }
+
+      // Check if price is defined, if not, return an error
+      if (product.price === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: 'Product price is not defined',
+        });
+      }
+  
+      // Verify the transaction on the blockchain
+      const connection = new Connection(
+        process.env.SOLANA_RPC! || clusterApiUrl("devnet")
+      );
+
+      const transaction = await connection.getTransaction(transactionSignature, {
+        maxSupportedTransactionVersion: 0
+      });
+  
+      if (!transaction) {
+        return res.status(400).json({
+          success: false,
+          message: 'Transaction not found or not confirmed',
+        });
+      }
+  
+      // Get the account keys
+      const accountKeys = transaction.transaction.message.getAccountKeys();
+      
+      // Update product details
+      product.quantity = product.quantity - 1;
+      product.sales = product.sales + 1;
+      product.revenue = product.revenue + product.price;
+  
+      await product.save();
+  
+      // Create transaction record
+      await create({
+        buyerId: accountKeys.get(0)?.toBase58() , // assuming the first account is the buyer
+        productId: product._id,
+        price: product.price
+      });
+  
+      return res.status(200).json({
+        success: true,
+        message: 'Product and transaction details updated successfully',
+      });
+  
+    } catch (error: any) {
+      return res.status(500).send({
+        success: false,
+        message: `Error: ${error.message}`,
+      });
+    }
+  }
+
 }
