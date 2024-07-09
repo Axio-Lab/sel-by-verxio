@@ -13,6 +13,6 @@ const {
 router.post("/:userId", validate(createProductSchema), createProduct);
 
 //get product by Id
-router.get("/get/:id", getProductById);
+router.get("/:id", getProductById);
 
 export default router;

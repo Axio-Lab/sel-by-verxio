@@ -7,12 +7,19 @@ export default class ProductService {
     }
 
     async getProductById(id: string) {
-        return await Product.findById(id).populate("userId", ["firstName", "lastName"]);
+        return await Product.findById(id)
+        // .populate("userId", ["firstName", "lastName"]);
     }
 
     async getProduct(id: string) {
-        const product = await Product.findById(id).populate("userId", ["firstName", "lastName"]);
+        const product = await Product.findById(id)
+        // .populate("userId", ["firstName", "lastName"]);
         if (!product) throw new Error("Invalid ProductId");
+        return product;
+    }
+
+    async getProductByQuery(query: Partial<IProduct>) {
+        const product = await Product.findOne(query);
         return product;
     }
 

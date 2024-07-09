@@ -27,7 +27,7 @@ const PreviewProduct = ({ formik }) => {
           </ListItem>
           <Divider />
           <ListItem>
-            <ListItemText primary="Product Image" secondary={values.productImage ? values.productImage.name : 'No product image uploaded'} />
+            <ListItemText primary="Product Image" secondary={values.productImage ? values.productImage : 'No product image uploaded'} />
           </ListItem>
           <Divider />
           <ListItem>
@@ -51,7 +51,7 @@ const PreviewProduct = ({ formik }) => {
           </ListItem>
           <Divider />
           <ListItem>
-            <ListItemText primary="File" secondary={values.file ? values.file.name : 'No file uploaded'} />
+            <ListItemText primary="File" secondary={values.productFile ? values.productFile : 'No file uploaded'} />
           </ListItem>
         </List>
       </CardContent>

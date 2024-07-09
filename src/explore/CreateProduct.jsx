@@ -29,13 +29,13 @@ const CreateProduct = () => {
   const formik = useFormik({
     initialValues: {
       name: '',
-      productImage: null,
+      productImage: "",
       description: '',
       productType: '',
       amount: '',
       category: '',
       quantity: '',
-      file: null
+      productFile: ''
     },
     validationSchema: Yup.object({
       name: Yup.string().required('Required'),
@@ -52,7 +52,7 @@ const CreateProduct = () => {
         .min(0, 'Quantity must be 0 or above')
         .integer('Quantity must be an integer'),
       productImage: Yup.mixed().required('Product image is required'),
-      file: Yup.mixed().required('File upload is required')
+      productFile: Yup.mixed().required('File upload is required')
     }),
     onSubmit: () => {
       if (activeStep === steps.length - 1) {

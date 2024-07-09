@@ -6,7 +6,7 @@ import { basePath } from "../configs/constants.configs";
 import { Request, Response } from "express";
 
 export default (app: { use: (arg0: string, arg1: any) => void; }) => {
-    app.use(`${basePath}/profiles`, profileRouter);
+    app.use(`${basePath}/profile`, profileRouter);
     app.use(`${basePath}/product`, productRouter);
     app.use(`${basePath}/action`, actionRouter);
     app.use(`${basePath}/docs`, docRouter);
