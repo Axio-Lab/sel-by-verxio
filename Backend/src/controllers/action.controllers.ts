@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import ProductService from "../services/product.servicee";
+import TransactionService from "../services/transaction.service";
 import { ACTIONS_CORS_HEADERS, ActionGetResponse, ActionPostRequest, ActionPostResponse } from "@solana/actions";
 import {
   clusterApiUrl,
@@ -14,6 +15,10 @@ import {
 const {
   getProductByQuery
 } = new ProductService();
+
+const {
+  create
+} = new TransactionService();
 
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
   "F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9"
@@ -31,6 +36,11 @@ export default class ActionController {
         name: productName
       });
 
+      if (!product) {
+        return res.status(404).json("Invalid product name")
+      }
+      const disabled = (product?.quantity! <= 0) ? true : false;
+
       let payload: ActionGetResponse;
       if (product?.payAnyPrice) {
         payload = {
@@ -38,6 +48,7 @@ export default class ActionController {
           icon: product?.image as unknown as string,
           description: `${product?.description}`,
           label: `Buy Now`,
+          disabled,
           links: {
             actions: [
               {
@@ -58,7 +69,8 @@ export default class ActionController {
           icon: product?.image as unknown as string,
           label: `Buy Now (${product?.price} SOL)`,
           description: `${product?.description}`,
-          title: `${product?.name}`
+          title: `${product?.name}`,
+          disabled
         }
       }
 
@@ -82,8 +94,12 @@ export default class ActionController {
         name: productName
       });
 
-      const body: ActionPostRequest = req.body;
+      if (!product) {
+        return res.status(404).json("Invalid product name")
+      }
 
+      const body: ActionPostRequest = req.body;
+      
       // Validate the client-provided input
       let account: PublicKey;
       try {
@@ -156,7 +172,7 @@ export default class ActionController {
       res.status(200).json(payload);
       // Here is the new part where we wait for the transaction to be confirmed
       const signedTransaction = Transaction.from(Buffer.from(payload.transaction, 'base64'));
-      
+
       // Sending and confirming the transaction
       const signature = await sendAndConfirmTransaction(connection, signedTransaction, []);
 
@@ -164,14 +180,19 @@ export default class ActionController {
 
       // If transaction is confirmed, log success and update database
       if (signature) {
-        console.log("Transaction successful!"); 
-        if (product) {
-          product.quantity = product?.quantity - 1;
-          product.sales = product?.sales + 1;
-          product.revenue = product?.revenue + price;
+        console.log("Transaction successful!");
 
-          await product.save();
-        }
+        product.quantity = product?.quantity - 1;
+        product.sales = product?.sales + 1;
+        product.revenue = product?.revenue + price;
+
+        await product.save();
+
+        await create({
+          buyerId: body.account,
+          productId: product._id,
+          price: product.price
+        })
       }
 
     } catch (error: any) {

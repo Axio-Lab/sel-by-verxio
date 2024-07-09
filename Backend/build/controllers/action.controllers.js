@@ -13,9 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const product_servicee_1 = __importDefault(require("../services/product.servicee"));
+const transaction_service_1 = __importDefault(require("../services/transaction.service"));
 const actions_1 = require("@solana/actions");
 const web3_js_1 = require("@solana/web3.js");
 const { getProductByQuery } = new product_servicee_1.default();
+const { create } = new transaction_service_1.default();
 const DEFAULT_SOL_ADDRESS = new web3_js_1.PublicKey("F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9");
 class ActionController {
     getAction(req, res) {
@@ -26,6 +28,10 @@ class ActionController {
                 const product = yield getProductByQuery({
                     name: productName
                 });
+                if (!product) {
+                    return res.status(404).json("Invalid product name");
+                }
+                const disabled = ((product === null || product === void 0 ? void 0 : product.quantity) <= 0) ? true : false;
                 let payload;
                 if (product === null || product === void 0 ? void 0 : product.payAnyPrice) {
                     payload = {
@@ -33,6 +39,7 @@ class ActionController {
                         icon: product === null || product === void 0 ? void 0 : product.image,
                         description: `${product === null || product === void 0 ? void 0 : product.description}`,
                         label: `Buy Now`,
+                        disabled,
                         links: {
                             actions: [
                                 {
@@ -54,7 +61,8 @@ class ActionController {
                         icon: product === null || product === void 0 ? void 0 : product.image,
                         label: `Buy Now (${product === null || product === void 0 ? void 0 : product.price} SOL)`,
                         description: `${product === null || product === void 0 ? void 0 : product.description}`,
-                        title: `${product === null || product === void 0 ? void 0 : product.name}`
+                        title: `${product === null || product === void 0 ? void 0 : product.name}`,
+                        disabled
                     };
                 }
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
@@ -76,6 +84,9 @@ class ActionController {
                 const product = yield getProductByQuery({
                     name: productName
                 });
+                if (!product) {
+                    return res.status(404).json("Invalid product name");
+                }
                 const body = req.body;
                 // Validate the client-provided input
                 let account;
@@ -121,11 +132,6 @@ class ActionController {
                 // Set the end user as the fee payer
                 transaction.feePayer = account;
                 transaction.recentBlockhash = (yield connection.getLatestBlockhash()).blockhash;
-                // Serialize the transaction for the client to sign
-                const serializedTransaction = transaction.serialize({
-                    requireAllSignatures: false,
-                    verifySignatures: true,
-                }).toString('base64');
                 const payload = {
                     transaction: transaction.serialize({
                         requireAllSignatures: false,
@@ -133,24 +139,26 @@ class ActionController {
                     }).toString('base64'),
                     message: `You've successfully purchased ${product === null || product === void 0 ? void 0 : product.name} for ${price} SOL 🎊`,
                 };
-                res.set(actions_1.ACTIONS_CORS_HEADERS);
-                res.status(200).json(payload);
                 // Here is the new part where we wait for the transaction to be confirmed
-                const signedTransaction = web3_js_1.Transaction.from(Buffer.from(serializedTransaction, 'base64'));
+                const signedTransaction = web3_js_1.Transaction.from(Buffer.from(payload.transaction, 'base64'));
                 // Sending and confirming the transaction
                 const signature = yield (0, web3_js_1.sendAndConfirmTransaction)(connection, signedTransaction, []);
                 console.log("Transaction Signature: ", signature);
                 // If transaction is confirmed, log success and update database
                 if (signature) {
                     console.log("Transaction successful!");
-                    // Add your database update logic here
-                    if (product) {
-                        product.quantity = (product === null || product === void 0 ? void 0 : product.quantity) - 1;
-                        product.sales = (product === null || product === void 0 ? void 0 : product.sales) + 1;
-                        product.revenue = (product === null || product === void 0 ? void 0 : product.revenue) + price;
-                        yield product.save();
-                    }
+                    product.quantity = (product === null || product === void 0 ? void 0 : product.quantity) - 1;
+                    product.sales = (product === null || product === void 0 ? void 0 : product.sales) + 1;
+                    product.revenue = (product === null || product === void 0 ? void 0 : product.revenue) + price;
+                    yield product.save();
+                    yield create({
+                        buyerId: body.account,
+                        productId: product._id,
+                        price: product.price
+                    });
                 }
+                res.set(actions_1.ACTIONS_CORS_HEADERS);
+                return res.status(200).json(payload);
             }
             catch (error) {
                 return res.status(500).send({

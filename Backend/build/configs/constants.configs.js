@@ -9,7 +9,8 @@ const DATABASES = {
     PROFILE: "profile",
     POINTS: "point",
     CAMPAIGN: "campaign",
-    PRODUCT: "product"
+    PRODUCT: "product",
+    TRANSACTION: "transaction"
 };
 exports.DATABASES = DATABASES;
 const MESSAGES = {

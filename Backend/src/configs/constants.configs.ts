@@ -4,7 +4,8 @@ const DATABASES = {
     PROFILE: "profile",
     POINTS: "point",
     CAMPAIGN: "campaign",
-    PRODUCT: "product"
+    PRODUCT: "product",
+    TRANSACTION: "transaction"
 };
 
 const MESSAGES = {
