@@ -139,26 +139,65 @@ class ActionController {
                     }).toString('base64'),
                     message: `You've successfully purchased ${product === null || product === void 0 ? void 0 : product.name} for ${price} SOL 🎊`,
                 };
-                // Here is the new part where we wait for the transaction to be confirmed
-                const signedTransaction = web3_js_1.Transaction.from(Buffer.from(payload.transaction, 'base64'));
-                // Sending and confirming the transaction
-                const signature = yield (0, web3_js_1.sendAndConfirmTransaction)(connection, signedTransaction, []);
-                console.log("Transaction Signature: ", signature);
-                // If transaction is confirmed, log success and update database
-                if (signature) {
-                    console.log("Transaction successful!");
-                    product.quantity = (product === null || product === void 0 ? void 0 : product.quantity) - 1;
-                    product.sales = (product === null || product === void 0 ? void 0 : product.sales) + 1;
-                    product.revenue = (product === null || product === void 0 ? void 0 : product.revenue) + price;
-                    yield product.save();
-                    yield create({
-                        buyerId: body.account,
-                        productId: product._id,
-                        price: product.price
-                    });
-                }
+                console.log("Payload:", payload);
+                console.log("Transaction:", transaction);
                 res.set(actions_1.ACTIONS_CORS_HEADERS);
                 return res.status(200).json(payload);
+            }
+            catch (error) {
+                return res.status(500).send({
+                    success: false,
+                    message: `Error: ${error.message}`,
+                });
+            }
+        });
+    }
+    updateAfterTransaction(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            try {
+                const { productName, transactionSignature } = req.body;
+                const product = yield getProductByQuery({
+                    name: productName
+                });
+                if (!product) {
+                    return res.status(404).json("Invalid product name");
+                }
+                // Check if price is defined, if not, return an error
+                if (product.price === undefined) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Product price is not defined',
+                    });
+                }
+                // Verify the transaction on the blockchain
+                const connection = new web3_js_1.Connection(process.env.SOLANA_RPC || (0, web3_js_1.clusterApiUrl)("devnet"));
+                const transaction = yield connection.getTransaction(transactionSignature, {
+                    maxSupportedTransactionVersion: 0
+                });
+                if (!transaction) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Transaction not found or not confirmed',
+                    });
+                }
+                // Get the account keys
+                const accountKeys = transaction.transaction.message.getAccountKeys();
+                // Update product details
+                product.quantity = product.quantity - 1;
+                product.sales = product.sales + 1;
+                product.revenue = product.revenue + product.price;
+                yield product.save();
+                // Create transaction record
+                yield create({
+                    buyerId: (_a = accountKeys.get(0)) === null || _a === void 0 ? void 0 : _a.toBase58(), // assuming the first account is the buyer
+                    productId: product._id,
+                    price: product.price
+                });
+                return res.status(200).json({
+                    success: true,
+                    message: 'Product and transaction details updated successfully',
+                });
             }
             catch (error) {
                 return res.status(500).send({
