@@ -99,7 +99,7 @@ export default class ActionController {
       }
 
       const body: ActionPostRequest = req.body;
-
+      
       // Validate the client-provided input
       let account: PublicKey;
       try {
