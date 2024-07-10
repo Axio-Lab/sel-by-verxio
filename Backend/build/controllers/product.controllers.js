@@ -13,13 +13,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const product_servicee_1 = __importDefault(require("../services/product.servicee"));
-const { create, getProductById } = new product_servicee_1.default();
+const { create, getProductById, getProductByQuery } = new product_servicee_1.default();
 const deployedLink = "https://sel-by-verxio.onrender.com";
 const devnetBlink = "https://dial.to/devnet?action=solana-action:";
 class ProductController {
     createProduct(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const foundProduct = yield getProductByQuery({ name: req.body.name });
+                if (foundProduct) {
+                    return res.status(409)
+                        .send({
+                        success: false,
+                        message: "Product name already exists"
+                    });
+                }
                 const product = yield create(Object.assign(Object.assign({}, req.body), { userId: req.params.userId }));
                 return res.status(200)
                     .send({
