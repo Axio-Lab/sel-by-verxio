@@ -5,6 +5,7 @@ const {
     getProductById
 } = new ProductService();
 const deployedLink = "https://sel-by-verxio.onrender.com";
+const devnetBlink = "https://dial.to/devnet?action=solana-action:";
 
 export default class ProductController {
     async createProduct(req: Request, res: Response) {
@@ -16,7 +17,7 @@ export default class ProductController {
                     success: true,
                     message: "Product created successfully",
                     product,
-                    blink: `${deployedLink}/api/v1/action/${product._id}`
+                    blink: `${devnetBlink}${deployedLink}/api/v1/action/${encodeURIComponent(product.name)}`
                 })
         } catch (error: any) {
             return res.status(500)
@@ -43,7 +44,7 @@ export default class ProductController {
                     success: true,
                     message: "Product fetched successfully",
                     product,
-                    blink: `${deployedLink}/api/v1/action/${product._id}`
+                    blink: `${devnetBlink}${deployedLink}/api/v1/action/${encodeURIComponent(product.name)}`
                 })
         } catch (error: any) {
             return res.status(500)
