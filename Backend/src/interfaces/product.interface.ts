@@ -7,6 +7,7 @@ export default interface IProduct {
     type: string;
     category: string;
     payAnyPrice?: boolean;
+    unlimited: boolean;
     price?: number;
     quantity: number;
     productFile: string;

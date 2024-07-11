@@ -24,7 +24,7 @@ export default class ProductService {
     }
 
     async getProducts(query: Partial<IProduct>) {
-        const products = await Product.find(query, "name type product sales revenue");
+        const products = await Product.find(query);
         return products;
     }
 }
