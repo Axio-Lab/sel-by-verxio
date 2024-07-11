@@ -24,7 +24,7 @@ class ActionController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const baseHref = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`).toString();
-                const productName = req.params.name;
+                const productName = decodeURIComponent(req.params.name);
                 const product = yield getProductByQuery({
                     name: productName
                 });
@@ -80,7 +80,7 @@ class ActionController {
     postAction(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const productName = req.params.name;
+                const productName = decodeURIComponent(req.params.name);
                 const product = yield getProductByQuery({
                     name: productName
                 });

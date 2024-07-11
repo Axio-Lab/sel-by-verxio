@@ -2,13 +2,23 @@ import { Request, Response } from "express";
 import ProductService from "../services/product.servicee";
 const {
     create,
-    getProductById
+    getProductById,
+    getProductByQuery
 } = new ProductService();
 const deployedLink = "https://sel-by-verxio.onrender.com";
+const devnetBlink = "https://dial.to/devnet?action=solana-action:";
 
 export default class ProductController {
     async createProduct(req: Request, res: Response) {
         try {
+            const foundProduct = await getProductByQuery({ name: req.body.name });
+            if(foundProduct) {
+                return res.status(409)
+                .send({
+                    success: false,
+                    message: "Product name already exists"
+                })
+            }
             const product = await create({ ...req.body, userId: req.params.userId });
 
             return res.status(200)
@@ -16,7 +26,7 @@ export default class ProductController {
                     success: true,
                     message: "Product created successfully",
                     product,
-                    blink: `${deployedLink}/api/v1/action/${product._id}`
+                    blink: `${devnetBlink}${deployedLink}/api/v1/action/${encodeURIComponent(product.name)}`
                 })
         } catch (error: any) {
             return res.status(500)
@@ -31,19 +41,19 @@ export default class ProductController {
         try {
             const product = await getProductById(req.params.id);
 
-            if(!product) {
+            if (!product) {
                 return res.status(404)
-                .send({
-                    success: false,
-                    message: "Product with the Id not found"
-                })
+                    .send({
+                        success: false,
+                        message: "Product with the Id not found"
+                    })
             }
             return res.status(200)
                 .send({
                     success: true,
                     message: "Product fetched successfully",
                     product,
-                    blink: `${deployedLink}/api/v1/action/${product._id}`
+                    blink: `${devnetBlink}${deployedLink}/api/v1/action/${encodeURIComponent(product.name)}`
                 })
         } catch (error: any) {
             return res.status(500)
