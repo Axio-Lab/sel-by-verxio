@@ -20,7 +20,10 @@ export default class ProductController {
                         message: "Product name already exists"
                     })
             }
-            const product = await create({ ...req.body, userId: req.params.userId });
+
+            const unlimited = req.body.quantity === 0 ? true : false;
+
+            const product = await create({ ...req.body, userId: req.params.userId, unlimited });
 
             return res.status(200)
                 .send({
@@ -78,13 +81,17 @@ export default class ProductController {
             }
 
             const products = product.map((one) => {
+
                 const plainOne = one.toObject();
+                const instock = one.unlimited ? "unlimited" : one.quantity;
+
                 return {
                     ...plainOne,
+                    instock,
                     blink: `${deployedLink}/api/v1/action/${encodeURIComponent(plainOne.name)}`
                 };
             });
-            
+
             return res.status(200)
                 .send({
                     success: true,

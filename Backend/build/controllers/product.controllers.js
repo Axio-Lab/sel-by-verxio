@@ -28,7 +28,8 @@ class ProductController {
                         message: "Product name already exists"
                     });
                 }
-                const product = yield create(Object.assign(Object.assign({}, req.body), { userId: req.params.userId }));
+                const unlimited = req.body.quantity === 0 ? true : false;
+                const product = yield create(Object.assign(Object.assign({}, req.body), { userId: req.params.userId, unlimited }));
                 return res.status(200)
                     .send({
                     success: true,
@@ -87,7 +88,8 @@ class ProductController {
                 }
                 const products = product.map((one) => {
                     const plainOne = one.toObject();
-                    return Object.assign(Object.assign({}, plainOne), { blink: `${deployedLink}/api/v1/action/${encodeURIComponent(plainOne.name)}` });
+                    const instock = one.unlimited ? "unlimited" : one.quantity;
+                    return Object.assign(Object.assign({}, plainOne), { instock, blink: `${deployedLink}/api/v1/action/${encodeURIComponent(plainOne.name)}` });
                 });
                 return res.status(200)
                     .send({

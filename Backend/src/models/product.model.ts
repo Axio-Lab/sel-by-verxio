@@ -47,6 +47,10 @@ const productSchema = new Schema<IProduct>({
         type: Number,
         required: true
     },
+    unlimited: {
+        type: Boolean,
+        required: true
+    },
     productFile: {
         type: String,
         required: true,

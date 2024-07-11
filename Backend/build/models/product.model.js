@@ -47,6 +47,10 @@ const productSchema = new mongoose_1.Schema({
         type: Number,
         required: true
     },
+    unlimited: {
+        type: Boolean,
+        required: true
+    },
     productFile: {
         type: String,
         required: true,
