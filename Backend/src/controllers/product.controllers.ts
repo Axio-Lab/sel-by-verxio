@@ -78,11 +78,13 @@ export default class ProductController {
             }
 
             const products = product.map((one) => {
+                const plainOne = one.toObject();
                 return {
-                    ...one,
-                    blink: `${deployedLink}/api/v1/action/${encodeURIComponent(one.name)}`
-                }
-            })
+                    ...plainOne,
+                    blink: `${deployedLink}/api/v1/action/${encodeURIComponent(plainOne.name)}`
+                };
+            });
+            
             return res.status(200)
                 .send({
                     success: true,

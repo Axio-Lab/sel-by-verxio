@@ -86,7 +86,8 @@ class ProductController {
                     });
                 }
                 const products = product.map((one) => {
-                    return Object.assign(Object.assign({}, one), { blink: `${deployedLink}/api/v1/action/${encodeURIComponent(one.name)}` });
+                    const plainOne = one.toObject();
+                    return Object.assign(Object.assign({}, plainOne), { blink: `${deployedLink}/api/v1/action/${encodeURIComponent(plainOne.name)}` });
                 });
                 return res.status(200)
                     .send({
