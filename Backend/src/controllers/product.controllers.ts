@@ -67,7 +67,7 @@ export default class ProductController {
 
     async getUserProduct(req: Request, res: Response) {
         try {
-            const product = await getProducts({ userId: req.params.id });
+            const product = await getProducts({ userId: req.params.userId });
 
             if (product.length === 0) {
                 return res.status(404)

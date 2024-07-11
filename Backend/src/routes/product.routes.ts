@@ -7,6 +7,7 @@ const router = Router();
 const {
     createProduct,
     getProductById,
+    getUserProduct
 } = new ProductController();
 
 //create a product
@@ -14,5 +15,8 @@ router.post("/:userId", validate(createProductSchema), createProduct);
 
 //get product by Id
 router.get("/:id", getProductById);
+
+//get user's products by Id
+router.get("/user/:userId", getUserProduct);
 
 export default router;
