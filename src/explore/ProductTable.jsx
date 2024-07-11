@@ -1,15 +1,17 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-
+import axios from 'axios';
 import MainCard from 'ui-component/cards/MainCard';
 import Grid from '@mui/material/Grid';
 import { gridSpacing } from 'store/constant';
-
+import { useWallet } from '@solana/wallet-adapter-react';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
-
+import { toast } from 'react-toastify';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -53,18 +55,28 @@ const getStatusProps = (statusText) => {
   return { statusColor};
 };
 
+const shortenURL = (url) => {
+  if (!url) return '';
+  const baseUrl = url.split('/').slice(0, 3).join('/'); 
+  const lastPart = url.split('/').pop().slice(0, 5);
+
+  // Create a shortened URL
+  return `${baseUrl}.....${lastPart}`;
+};
 
 // Create data function
-function createData(name, type, sales, amount, link, createdAt, inStock, totalEarning, customers) {
+function createData(name, type, category, inStock, amount, link, createdAt, sales, totalEarning, product, customers) {
   return {
     name,
     type,
-    sales,
+    category,
+    inStock,
     amount,
     link,
     createdAt,
-    inStock,
+    sales,
     totalEarning,
+    product,
     customers,
   };
 }
@@ -74,6 +86,10 @@ function Row(props) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
   const { statusColor } = getStatusProps(row.type);
+
+  const handleCopy = () => {
+    toast.info("URL has been copied!");
+  };
 
   return (
     <React.Fragment>
@@ -91,10 +107,16 @@ function Row(props) {
           {row.name}
         </TableCell>
         <TableCell align="center" sx={{ color: statusColor.dark }}>{row.type}</TableCell>
-        <TableCell align="center">{row.sales}</TableCell>
-        <TableCell align="center">{row.revenue}</TableCell>
+        <TableCell align="center">{row.category}</TableCell>
+        <TableCell align="center">{row.inStock}</TableCell>
+        <TableCell align="center">{row.amount}</TableCell>
         <TableCell align="right">
-          {row.link}
+        <CopyToClipboard text={row.link} onCopy={handleCopy}>
+            <IconButton aria-label="copy link" size="small">
+              <Typography variant="body2" sx={{ marginRight: 1 }}>{shortenURL(row.link)}</Typography>
+              <ContentCopyIcon />
+            </IconButton>
+          </CopyToClipboard>
         </TableCell>
       </TableRow>
       <TableRow>
@@ -109,19 +131,25 @@ function Row(props) {
                   <TableRow>
                     <TableCell>Created At</TableCell>
                     <TableCell align='center'>Sales</TableCell>
-                    <TableCell align="center">Revenue</TableCell>
+                    <TableCell align="center">Total Earning</TableCell>
+                    <TableCell align="center">Product Link</TableCell>
                     <TableCell align="center">Customers</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   <TableRow>
                     <TableCell>{row.createdAt}</TableCell>
-                    <TableCell align='center'>{row.inStock}</TableCell>
+                    <TableCell align='center'>{row.sales}</TableCell>
                     <TableCell align="center">{row.totalEarning}</TableCell>
                     <TableCell align="center">
-                      {/* <a href={row.customers} target="_blank" rel="noopener noreferrer">
-                        View Customers
-                      </a> */}
+                    <CopyToClipboard text={row.product} onCopy={handleCopy}>
+                      <IconButton aria-label="copy link" size="small">
+                        <Typography variant="body2" sx={{ marginRight: 1 }}>{shortenURL(row.product)}</Typography>
+                        <ContentCopyIcon />
+                      </IconButton>
+                    </CopyToClipboard>
+                    </TableCell>
+                    <TableCell align="center">
                       <Link to={`/explore/customers/${row.name}`}>View Customers</Link>
                     </TableCell>
                   </TableRow>
@@ -139,28 +167,24 @@ Row.propTypes = {
   row: PropTypes.shape({
     name: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
-    sales: PropTypes.number.isRequired,
-    revenue: PropTypes.string.isRequired,
+    category: PropTypes.string.isRequired,
+    inStock: PropTypes.number.isRequired,
+    amount: PropTypes.number.isRequired,
     link: PropTypes.string.isRequired,
     createdAt: PropTypes.string.isRequired,
-    inStock: PropTypes.number.isRequired,
-    totalEarning: PropTypes.string.isRequired,
+    totalEarning: PropTypes.number.isRequired,
     customers: PropTypes.string.isRequired,
   }).isRequired,
 };
 
-// Data rows
-const rows = [
-  createData('Business Mastery Mentorship', 'Ticket', 20, '$997', 'https://verxio.xyz/product/66f4223550d95f50f', '2023-01-05', 24, '$5,700', 'https://verxio.xyz/customers/66f4223550d95f50f'),
-  createData('Bonk Collections', 'Ebook', 15, '$27', 'https://verxio.xyz/product/6669845678gvbh', '2023-02-15', 15, '$405', 'https://verxio.xyz/customers/6669845678gvbh'),
-  createData('Reliance Academy', 'Course', 20, '$1,150', 'https://verxio.xyz/product/bfvgbhnjktyu6', '2023-03-10', 20, '$23,000', 'https://verxio.xyz/customers/bfvgbhnjktyu6'),
-  createData('1-0n-1 Fireside Chat', 'Service', 10, '$900', 'https://verxio.xyz/product/bfvgbh67yktyu6', '2023-04-20', 10, '$9,000', 'https://verxio.xyz/customers/bfvgbh67yktyu6'),
-  createData('Social Media Mastery for Businesses', 'Others', 50, '$50', 'https://verxio.xyz/product/bfvfghtktyu6', '2023-05-30', 50, '$2,500', 'https://verxio.xyz/customers/bfvfghtktyu6'),
-];
-
+// Fetch product details and set rows
 export default function ProductTable() {
+  const [rows, setRows] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const { publicKey, connected } = useWallet();
+
+  const userId = publicKey?.toBase58();
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -171,10 +195,56 @@ export default function ProductTable() {
     setPage(0);
   };
 
+  const getProductDetails = async (productId) => {
+    try {
+      const response = await axios.get(`https://sel-by-verxio.onrender.com/api/v1/product/user/${productId}`);
+      // Convert the API response to rows
+      const fetchedRows = response.data.products.map(product => createData(
+        product.name,
+        product.type,
+        product.category,
+        product.quantity,
+        product.price,
+        product.blink,
+        product.createdAt,
+        product.sales,
+        product.revenue,
+        product.productFile,
+        product.customers
+      ));
+
+      setRows(fetchedRows);
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    if (userId) {
+      getProductDetails(userId);
+    } else {
+      setRows([]); 
+    }
+  }, [ userId]);
+
+  if (!connected) {
+    return (
+      <Box sx={{ marginTop: 4, textAlign: 'center' }}>
+        <Typography variant="body1">Please connect your wallet to view products.</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ marginTop: 4 }}>
       <MainCard title="All Products 🛒">
         <Grid container spacing={gridSpacing}>
+        {rows.length === 0 ? (
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body1">No records found.</Typography>
+            </Box>
+          ) : (
+            <>
           <TableContainer component={Paper}>
             <Table aria-label="collapsible table">
               <TableHead>
@@ -182,9 +252,10 @@ export default function ProductTable() {
                   <TableCell />
                   <TableCell>Product Name</TableCell>
                   <TableCell align="center">Type</TableCell>
+                  <TableCell align="center">Category</TableCell>
                   <TableCell align="center">In Stock</TableCell>
                   <TableCell align="center">Amount</TableCell>
-                  <TableCell align="right">Product Link</TableCell>
+                  <TableCell align="right">Blink URL</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -207,6 +278,8 @@ export default function ProductTable() {
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </Box>
+          </>
+          )}
         </Grid>
       </MainCard>
     </Box>

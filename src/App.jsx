@@ -28,6 +28,9 @@ import {
   WalletModalProvider,
 } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
+import { ToastContainer } from 'react-toastify';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 import '@solana/wallet-adapter-react-ui/styles.css';
 
@@ -65,6 +68,7 @@ const App = () => {
               <WalletProvider wallets={wallets} autoConnect>
                 <WalletModalProvider>
                     <RouterProvider router={router} />
+                    <ToastContainer />
                 </WalletModalProvider>
               </WalletProvider>
           </NavigationScroll>
