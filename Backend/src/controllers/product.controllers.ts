@@ -83,11 +83,11 @@ export default class ProductController {
             const products = product.map((one) => {
 
                 const plainOne = one.toObject();
-                const instock = one.unlimited ? "unlimited" : one.quantity;
+                const quantity = one.unlimited ? "unlimited" : one.quantity;
 
                 return {
                     ...plainOne,
-                    instock,
+                    quantity,
                     blink: `${deployedLink}/api/v1/action/${encodeURIComponent(plainOne.name)}`
                 };
             });

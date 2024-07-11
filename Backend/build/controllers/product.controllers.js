@@ -88,8 +88,8 @@ class ProductController {
                 }
                 const products = product.map((one) => {
                     const plainOne = one.toObject();
-                    const instock = one.unlimited ? "unlimited" : one.quantity;
-                    return Object.assign(Object.assign({}, plainOne), { instock, blink: `${deployedLink}/api/v1/action/${encodeURIComponent(plainOne.name)}` });
+                    const quantity = one.unlimited ? "unlimited" : one.quantity;
+                    return Object.assign(Object.assign({}, plainOne), { quantity, blink: `${deployedLink}/api/v1/action/${encodeURIComponent(plainOne.name)}` });
                 });
                 return res.status(200)
                     .send({

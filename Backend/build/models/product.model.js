@@ -68,7 +68,7 @@ const productSchema = new mongoose_1.Schema({
     }
 }, {
     strict: true,
-    timestamps: false,
+    timestamps: true,
     versionKey: false
 });
 const Product = (0, mongoose_1.model)(constants_configs_1.DATABASES.PRODUCT, productSchema);
