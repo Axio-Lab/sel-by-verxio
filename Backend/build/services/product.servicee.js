@@ -42,7 +42,7 @@ class ProductService {
     }
     getProducts(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            const products = yield product_model_1.default.find(query, "name type product sales revenue");
+            const products = yield product_model_1.default.find(query);
             return products;
         });
     }

@@ -11,7 +11,8 @@ const productSchema = new Schema<IProduct>({
     name: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        unique: true
     },
     image: {
         type: String,
@@ -46,6 +47,10 @@ const productSchema = new Schema<IProduct>({
         type: Number,
         required: true
     },
+    unlimited: {
+        type: Boolean,
+        required: true
+    },
     productFile: {
         type: String,
         required: true,
@@ -63,7 +68,7 @@ const productSchema = new Schema<IProduct>({
     }
 }, {
     strict: true,
-    timestamps: false,
+    timestamps: true,
     versionKey: false
 });
 
