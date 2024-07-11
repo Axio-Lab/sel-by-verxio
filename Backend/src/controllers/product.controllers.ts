@@ -83,7 +83,7 @@ export default class ProductController {
             const products = product.map((one) => {
 
                 const plainOne = one.toObject();
-                const quantity = one.unlimited ? "unlimited" : one.quantity;
+                const quantity = one.unlimited ? "Unlimited" : (one.quantity === 0) ? "Sold Out" : one.quantity;
 
                 return {
                     ...plainOne,
