@@ -151,35 +151,65 @@ export default class ActionController {
       // Transfer 10% of the funds to the default SOL address
         SystemProgram.transfer({
           fromPubkey: account,
-          toPubkey: sellerPubkey,
-          lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.9),
+          toPubkey: DEFAULT_SOL_ADDRESS,
+          lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.1),
         }),
 
       ];
       
-      const transactionSignature = await helius.rpc.sendSmartTransaction(instructions, [], [], { skipPreflight: true });
+      const transaction = new Transaction().add(...instructions);
+      // Set the end user as the fee payer
+      transaction.feePayer = account;
+      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-      const payload: ActionPostResponse = {
-        transaction: transactionSignature,
-        message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
+      const signedTransaction = transaction.serialize({
+        requireAllSignatures: false,
+        verifySignatures: true,
+      })
+
+      // After sending the transaction and getting the signature
+      const signature = await connection.sendRawTransaction(signedTransaction);
+
+      console.log("Transaction sent with signature:", signature);
+
+      // Confirm the transaction using the new method
+      const latestBlockHash = await connection.getLatestBlockhash();
+
+      const confirmationStrategy = {
+        signature: signature,
+        blockhash: latestBlockHash.blockhash,
+        lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
       };
 
-      console.log("Payload:", payload)
-      console.log(`Successful transfer: ${transactionSignature}`);
+      let payload: ActionPostResponse | undefined;
+      try {
+        const confirmation = await connection.confirmTransaction(confirmationStrategy);
+        if (!confirmation.value.err){
+          payload = {
+            transaction: signedTransaction.toString('base64'),
+            message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
+          };
+    
+          console.log("Payload:", payload)
 
-       // Update product details
-       product.quantity = product.quantity - 1;
-       product.sales = product.sales + 1;
-       product.revenue = product.revenue + price;
-   
-       await product.save();
-   
-       // Create transaction record
-       await create({
-         buyerId: account.toString(), 
-         productId: product._id,
-         price: product.price
-       });
+          // Update product details
+          product.quantity = product.quantity - 1;
+          product.sales = product.sales + 1;
+          product.revenue = product.revenue + price;
+      
+          await product.save();
+      
+          // Create transaction record
+          await create({
+            buyerId: account.toString(), 
+            productId: product._id,
+            price: product.price
+          });
+
+        }
+      } catch (error) {
+        console.error("Error confirming transaction:", error);
+      }
 
       res.set(ACTIONS_CORS_HEADERS);
       return res.status(200).json(payload);
