@@ -8,12 +8,9 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   sendAndConfirmTransaction,
-  TransactionInstruction,
   SystemProgram,
   Transaction,
-  Keypair,
 } from "@solana/web3.js";
-import { Helius } from "helius-sdk";
 
 const {
   getProductByQuery
@@ -26,8 +23,6 @@ const {
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
   "F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9"
 );
-
-const helius = new Helius("d7aa98e6-4f1e-420d-be26-231d5a586b93");
 
 export default class ActionController {
   async getAction(req: Request, res: Response) {
@@ -117,7 +112,7 @@ export default class ActionController {
       }
 
       const connection = new Connection(
-        "https://devnet.helius-rpc.com/?api-key=d7aa98e6-4f1e-420d-be26-231d5a586b93"
+        process.env.SOLANA_RPC! || clusterApiUrl("devnet")
       );
 
       // Ensure the receiving account will be rent exempt
@@ -141,78 +136,109 @@ export default class ActionController {
         product?.userId as string
       );
 
-      const instructions: TransactionInstruction[] = [
+      const transaction = new Transaction();
+
       // Transfer 90% of the funds to the seller's address
+      transaction.add(
         SystemProgram.transfer({
           fromPubkey: account,
           toPubkey: sellerPubkey,
           lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.9),
         }),
+      );
+
       // Transfer 10% of the funds to the default SOL address
+      transaction.add(
         SystemProgram.transfer({
           fromPubkey: account,
           toPubkey: DEFAULT_SOL_ADDRESS,
           lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.1),
         }),
+      );
 
-      ];
-      
-      const transaction = new Transaction().add(...instructions);
       // Set the end user as the fee payer
       transaction.feePayer = account;
       transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-      const signedTransaction = transaction.serialize({
-        requireAllSignatures: false,
-        verifySignatures: true,
-      })
-
-      // After sending the transaction and getting the signature
-      const signature = await connection.sendRawTransaction(signedTransaction);
-
-      console.log("Transaction sent with signature:", signature);
-
-      // Confirm the transaction using the new method
-      const latestBlockHash = await connection.getLatestBlockhash();
-
-      const confirmationStrategy = {
-        signature: signature,
-        blockhash: latestBlockHash.blockhash,
-        lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+      const payload: ActionPostResponse = {
+        transaction: transaction.serialize({
+          requireAllSignatures: false,
+          verifySignatures: true,
+        }).toString('base64'),
+        message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
       };
-
-      try {
-        const confirmation = await connection.confirmTransaction(confirmationStrategy);
-        if (!confirmation.value.err){
-          const payload: ActionPostResponse = {
-            transaction: signedTransaction.toString('base64'),
-            message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
-          };
-    
-          console.log("Payload:", payload)
-
-          // Update product details
-          product.quantity = product.quantity - 1;
-          product.sales = product.sales + 1;
-          product.revenue = product.revenue + price;
-      
-          await product.save();
-      
-          // Create transaction record
-          await create({
-            buyerId: account.toString(), 
-            productId: product._id,
-            price: product.price
-          });
-
-        }
-      } catch (error) {
-        console.error("Error confirming transaction:", error);
-      }
+      console.log("Payload:", payload)
+      console.log("Transaction:", transaction)
 
       res.set(ACTIONS_CORS_HEADERS);
-      return res.status(200);
+      return res.status(200).json(payload);
 
+    } catch (error: any) {
+      return res.status(500).send({
+        success: false,
+        message: `Error: ${error.message}`,
+      });
+    }
+  }
+
+  async updateAfterTransaction(req: Request, res: Response) {
+    try {
+      const { productName, transactionSignature } = req.body;
+  
+      const product = await getProductByQuery({
+        name: productName
+      });
+  
+      if (!product) {
+        return res.status(404).json("Invalid product name");
+      }
+
+      // Check if price is defined, if not, return an error
+      if (product.price === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: 'Product price is not defined',
+        });
+      }
+  
+      // Verify the transaction on the blockchain
+      const connection = new Connection(
+        process.env.SOLANA_RPC! || clusterApiUrl("devnet")
+      );
+
+      const transaction = await connection.getTransaction(transactionSignature, {
+        maxSupportedTransactionVersion: 0
+      });
+  
+      if (!transaction) {
+        return res.status(400).json({
+          success: false,
+          message: 'Transaction not found or not confirmed',
+        });
+      }
+  
+      // Get the account keys
+      const accountKeys = transaction.transaction.message.getAccountKeys();
+      
+      // Update product details
+      product.quantity = product.quantity - 1;
+      product.sales = product.sales + 1;
+      product.revenue = product.revenue + product.price;
+  
+      await product.save();
+  
+      // Create transaction record
+      await create({
+        buyerId: accountKeys.get(0)?.toBase58() , // assuming the first account is the buyer
+        productId: product._id,
+        price: product.price
+      });
+  
+      return res.status(200).json({
+        success: true,
+        message: 'Product and transaction details updated successfully',
+      });
+  
     } catch (error: any) {
       return res.status(500).send({
         success: false,
