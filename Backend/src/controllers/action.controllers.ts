@@ -8,12 +8,9 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   sendAndConfirmTransaction,
-  TransactionInstruction,
   SystemProgram,
   Transaction,
-  Keypair,
 } from "@solana/web3.js";
-import { Helius } from "helius-sdk";
 
 const {
   getProductByQuery
@@ -26,8 +23,6 @@ const {
 const DEFAULT_SOL_ADDRESS: PublicKey = new PublicKey(
   "F6XAa9hcAp9D9soZAk4ea4wdkmX4CmrMEwGg33xD1Bs9"
 );
-
-const helius = new Helius("d7aa98e6-4f1e-420d-be26-231d5a586b93");
 
 export default class ActionController {
   async getAction(req: Request, res: Response) {
@@ -117,7 +112,7 @@ export default class ActionController {
       }
 
       const connection = new Connection(
-        "https://devnet.helius-rpc.com/?api-key=d7aa98e6-4f1e-420d-be26-231d5a586b93"
+        process.env.SOLANA_RPC! || clusterApiUrl("devnet")
       );
 
       // Ensure the receiving account will be rent exempt
@@ -141,45 +136,52 @@ export default class ActionController {
         product?.userId as string
       );
 
-      const instructions: TransactionInstruction[] = [
-      // Transfer 90% of the funds to the seller's address
-        SystemProgram.transfer({
-          fromPubkey: account,
-          toPubkey: sellerPubkey,
-          lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.9),
-        }),
-      // Transfer 10% of the funds to the default SOL address
-        SystemProgram.transfer({
-          fromPubkey: account,
-          toPubkey: sellerPubkey,
-          lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.9),
-        }),
+      const transaction = new Transaction();
 
-      ];
-      
-      const transactionSignature = await helius.rpc.sendSmartTransaction(instructions, [], [], { skipPreflight: true });
+      // Transfer 90% of the funds to the seller's address
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey: account,
+          toPubkey: sellerPubkey,
+          lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.9),
+        }),
+      );
+
+      // Transfer 10% of the funds to the default SOL address
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey: account,
+          toPubkey: DEFAULT_SOL_ADDRESS,
+          lamports: Math.floor(price * LAMPORTS_PER_SOL * 0.1),
+        }),
+      );
+
+      // Set the end user as the fee payer
+      transaction.feePayer = account;
+      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
       const payload: ActionPostResponse = {
-        transaction: transactionSignature,
+        transaction: transaction.serialize({
+          requireAllSignatures: false,
+          verifySignatures: true,
+        }).toString('base64'),
         message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
       };
-
       console.log("Payload:", payload)
-      console.log(`Successful transfer: ${transactionSignature}`);
+      console.log("Transaction:", transaction)
 
-       // Update product details
-       product.quantity = product.quantity - 1;
-       product.sales = product.sales + 1;
-       product.revenue = product.revenue + price;
-   
-       await product.save();
-   
-       // Create transaction record
-       await create({
-         buyerId: account.toString(), 
-         productId: product._id,
-         price: product.price
-       });
+      // product.quantity = product.quantity - 1;
+      // product.sales = product.sales + 1;
+      // product.revenue = product.revenue + price;
+  
+      // await product.save();
+  
+      // // Create transaction record
+      // await create({
+      //   buyerId: account.toString() , // assuming the first account is the buyer
+      //   productId: product._id,
+      //   price: product.price
+      // });
 
       res.set(ACTIONS_CORS_HEADERS);
       return res.status(200).json(payload);
@@ -192,4 +194,5 @@ export default class ActionController {
     }
   }
 
+ 
 }
