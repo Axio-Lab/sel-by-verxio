@@ -181,11 +181,11 @@ export default class ActionController {
         lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
       };
 
-    let payload;
+      let payload: ActionPostResponse | undefined;
       try {
         const confirmation = await connection.confirmTransaction(confirmationStrategy);
-        if (confirmation){
-          const payload: ActionPostResponse = {
+        if (!confirmation.value.err){
+          payload = {
             transaction: signedTransaction.toString('base64'),
             message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
           };
