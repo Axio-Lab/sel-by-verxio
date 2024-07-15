@@ -181,11 +181,10 @@ export default class ActionController {
         lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
       };
 
-      let payload: ActionPostResponse | undefined;
       try {
         const confirmation = await connection.confirmTransaction(confirmationStrategy);
         if (!confirmation.value.err){
-          payload = {
+          const payload: ActionPostResponse = {
             transaction: signedTransaction.toString('base64'),
             message: `You've successfully purchased ${product?.name} for ${price} SOL 🎊`,
           };
@@ -212,7 +211,7 @@ export default class ActionController {
       }
 
       res.set(ACTIONS_CORS_HEADERS);
-      return res.status(200).json(payload);
+      return res.status(200);
 
     } catch (error: any) {
       return res.status(500).send({
