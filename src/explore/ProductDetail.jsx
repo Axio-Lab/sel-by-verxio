@@ -19,18 +19,17 @@ const productTypes = ['📚 Ebook', '🎫 Ticket', '👩🏾‍🏫 Course', '�
 const categories = ['👔 Business', '👩‍❤️‍👨 Relationship', '🔮 Spirituality', '🎭 Arts and Entertainment', '🏋🏽 Health and Fitness', '😶‍🌫️ Others'];
 
 const ProductDetail = ({ formik }) => {
-  const [isCustomAmount, setIsCustomAmount] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
   const [loadingFile, setLoadingFile] = useState(false);
 
   const handleFreeProductChange = (event) => {
     const checked = event.target.checked;
-    setIsCustomAmount(checked);
     if (checked) {
-      formik.setFieldValue('amount', '');
+      formik.setFieldValue('amount', 0);
     } else {
       formik.setFieldValue('amount', formik.values.amount || '');
     }
+    formik.setFieldValue('payAnyAmount', checked);
   };
 
   const handleQuantityChange = (event) => {
@@ -70,7 +69,6 @@ const ProductDetail = ({ formik }) => {
         body: formData
       });
       const results = await response.json();
-      console.log('Image URL:', results.url);
       formik.setFieldValue('productImage', results.url);
     } catch (error) {
       console.log('Error uploading image:', error);
@@ -91,7 +89,6 @@ const ProductDetail = ({ formik }) => {
         body: formData
       });
       const results = await response.json();
-      console.log('File URL:', results.url);
       formik.setFieldValue('productFile', results.url);
     } catch (error) {
       console.log('Error uploading file:', error);
@@ -135,6 +132,9 @@ const ProductDetail = ({ formik }) => {
               {formik.values.productImage}
             </Typography>
           )}
+            {formik.touched.productImage && formik.errors.productImage && (
+              <FormHelperText error>{formik.errors.productImage}</FormHelperText>
+            )}
         </Grid>
         <Grid item xs={12}>
           <TextField
@@ -192,19 +192,19 @@ const ProductDetail = ({ formik }) => {
         <Grid item xs={12}>
           <TextField
             name="amount"
-            label="Amount ($)"
+            label="Amount (SOL)"
             variant="outlined"
             fullWidth
             size="small"
             type="number"
-            value={isCustomAmount ? '' : formik.values.amount}
+            value={formik.values.amount}
             onChange={formik.handleChange}
             error={Boolean(formik.touched.amount && formik.errors.amount)}
             helperText={formik.touched.amount && formik.errors.amount}
-            disabled={isCustomAmount}
+            disabled={formik.values.payAnyAmount}
           />
           <FormControlLabel
-            control={<Checkbox checked={isCustomAmount} onChange={handleFreeProductChange} name="isCustomAmount" />}
+            control={<Checkbox checked={formik.values.payAnyAmount} onChange={handleFreeProductChange} name="payAnyAmount" />}
             label="Enable Custom Amount"
           />
         </Grid>
@@ -246,6 +246,9 @@ const ProductDetail = ({ formik }) => {
               {formik.values.productFile}
             </Typography>
           )}
+            {formik.touched.productFile && formik.errors.productFile && (
+              <FormHelperText error>{formik.errors.productFile}</FormHelperText>
+            )}
         </Grid>
       </Grid>
     </form>

@@ -1,19 +1,16 @@
 import React from 'react';
-import { 
-    Card, 
-    CardContent, 
-    Typography, 
-    List, 
-    ListItem, 
-    ListItemText, 
-    Divider 
+import {
+  Card,
+  CardContent,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Divider
 } from '@mui/material';
-
 
 const PreviewProduct = ({ formik }) => {
   const { values } = formik;
-
-  console.log("showing Values", values)
 
   return (
     <Card>
@@ -39,7 +36,7 @@ const PreviewProduct = ({ formik }) => {
           </ListItem>
           <Divider />
           <ListItem>
-            <ListItemText primary="Amount" secondary={values.amount} />
+            <ListItemText primary="Amount in SOL" secondary={values.payAnyAmount ? 'Pay any amount' : values.amount} />
           </ListItem>
           <Divider />
           <ListItem>
@@ -47,7 +44,7 @@ const PreviewProduct = ({ formik }) => {
           </ListItem>
           <Divider />
           <ListItem>
-            <ListItemText primary="Quantity" secondary={values.quantity === '0' ? 'Unlimited' : values.quantity}  />
+            <ListItemText primary="Quantity" secondary={values.quantity === '0' ? 'Unlimited' : values.quantity} />
           </ListItem>
           <Divider />
           <ListItem>
