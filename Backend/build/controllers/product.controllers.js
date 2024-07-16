@@ -30,12 +30,13 @@ class ProductController {
                 }
                 const unlimited = req.body.quantity === 0 ? true : false;
                 const product = yield create(Object.assign(Object.assign({}, req.body), { userId: req.params.userId, unlimited }));
+                const encodedProductName = product === null || product === void 0 ? void 0 : product.name.replace(/\s+/g, '-');
                 return res.status(200)
                     .send({
                     success: true,
                     message: "Product created successfully",
                     product,
-                    blink: `${deployedLink}/api/v1/action/${encodeURIComponent(product.name)}`
+                    blink: `${deployedLink}/${encodedProductName}`
                 });
             }
             catch (error) {
@@ -51,6 +52,7 @@ class ProductController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const product = yield getProductById(req.params.id);
+                const encodedProductName = product === null || product === void 0 ? void 0 : product.name.replace(/\s+/g, '-');
                 if (!product) {
                     return res.status(404)
                         .send({
@@ -63,7 +65,7 @@ class ProductController {
                     success: true,
                     message: "Product fetched successfully",
                     product,
-                    blink: `${deployedLink}/api/v1/action/${encodeURIComponent(product.name)}`
+                    blink: `${deployedLink}/${encodedProductName}`
                 });
             }
             catch (error) {
@@ -89,7 +91,8 @@ class ProductController {
                 const products = product.map((one) => {
                     const plainOne = one.toObject();
                     const quantity = one.unlimited ? "Unlimited" : (one.quantity === 0) ? "Sold Out" : one.quantity;
-                    return Object.assign(Object.assign({}, plainOne), { quantity, blink: `${deployedLink}/api/v1/action/${encodeURIComponent(plainOne.name)}` });
+                    const encodedProductName = plainOne === null || plainOne === void 0 ? void 0 : plainOne.name.replace(/\s+/g, '-');
+                    return Object.assign(Object.assign({}, plainOne), { quantity, blink: `${deployedLink}/${encodedProductName}` });
                 });
                 return res.status(200)
                     .send({

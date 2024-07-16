@@ -31,7 +31,7 @@ export default class ActionController {
         `${req.protocol}://${req.get('host')}${req.originalUrl}`
       ).toString();
 
-      const productName = decodeURIComponent(req.params.name);
+      const productName = (req.params.name.replace(/-/g, ' '));
       const product = await getProductByQuery({
         name: productName
       });
@@ -89,7 +89,7 @@ export default class ActionController {
 
   async postAction(req: Request, res: Response) {
     try {
-      const productName = decodeURIComponent(req.params.name);
+      const productName = (req.params.name.replace(/-/g, ' '));
       const product = await getProductByQuery({
         name: productName
       });
