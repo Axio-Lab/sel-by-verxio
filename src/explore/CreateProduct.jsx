@@ -91,7 +91,7 @@ const CreateProduct = () => {
         setIsSubmitting(true);
 
         try {
-          const response = await axios.post(`https://sel-by-verxio.onrender.com/api/v1/product/${userId}`, 
+          const response = await axios.post(`https://usesel.online/api/v1/product/${userId}`, 
             {
             name: values.name,
             type: values.productType,

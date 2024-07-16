@@ -197,7 +197,7 @@ export default function ProductTable() {
 
   const getProductDetails = async (productId) => {
     try {
-      const response = await axios.get(`https://sel-by-verxio.onrender.com/api/v1/product/user/${productId}`);
+      const response = await axios.get(`https://usesel.online/api/v1/product/user/${productId}`);
       // Convert the API response to rows
       const fetchedRows = response.data.products.map(product => createData(
         product.name,
